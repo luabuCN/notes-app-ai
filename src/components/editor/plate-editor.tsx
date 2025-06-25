@@ -4,8 +4,8 @@ import * as React from 'react';
 
 import { Plate, usePlateEditor } from 'platejs/react';
 
-import { EditorKit } from '@/components/editor-kit';
-import { SettingsDialog } from '@/components/settings-dialog';
+import { EditorKit } from './editor-kit';
+import { SettingsDialog } from './settings-dialog';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 
 export function PlateEditor() {

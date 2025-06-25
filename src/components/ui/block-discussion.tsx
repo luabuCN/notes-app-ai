@@ -31,12 +31,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { commentPlugin } from '@/components/comment-kit';
+import { commentPlugin } from '@/components/editor/comment-kit';
 import {
   type TDiscussion,
   discussionPlugin,
-} from '@/components/discussion-kit';
-import { suggestionPlugin } from '@/components/suggestion-kit';
+} from '@/components/editor/discussion-kit';
+import { suggestionPlugin } from '@/components/editor/suggestion-kit';
 
 import {
   BlockSuggestionCard,

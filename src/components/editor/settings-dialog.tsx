@@ -40,7 +40,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { aiChatPlugin } from '@/components/ai-kit';
+import { aiChatPlugin } from '@/components/editor/ai-kit';
 
 interface Model {
   label: string;

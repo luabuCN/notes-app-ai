@@ -6,7 +6,7 @@ import { useChat as useBaseChat } from '@ai-sdk/react';
 import { faker } from '@faker-js/faker';
 import { usePluginOption } from 'platejs/react';
 
-import { aiChatPlugin } from '@/components/ai-kit';
+import { aiChatPlugin } from '@/components/editor/ai-kit';
 
 export const useChat = () => {
   const options = usePluginOption(aiChatPlugin, 'chatOptions');

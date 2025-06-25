@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import {
   type SuggestionConfig,
   suggestionPlugin,
-} from '@/components/suggestion-kit';
+} from '@/components/editor/suggestion-kit';
 
 export function SuggestionLeaf(props: PlateLeafProps<TSuggestionText>) {
   const { api, setOption } = useEditorPlugin(suggestionPlugin);

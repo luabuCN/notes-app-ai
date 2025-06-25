@@ -31,8 +31,8 @@ import { cn } from '@/lib/utils';
 import {
   type TDiscussion,
   discussionPlugin,
-} from '@/components/discussion-kit';
-import { suggestionPlugin } from '@/components/suggestion-kit';
+} from '@/components/editor/discussion-kit';
+import { suggestionPlugin } from '@/components/editor/suggestion-kit';
 
 import {
   type TComment,

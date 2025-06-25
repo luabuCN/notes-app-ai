@@ -1,5 +1,5 @@
-"use client"
-
+"use client";
+import { ThemeProvider } from "next-themes";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
@@ -10,14 +10,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html>
+    <html suppressHydrationWarning>
       <body onContextMenu={(e) => e.preventDefault()}>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <main className="flex flex-1 flex-col">{children}</main>
-          </SidebarInset>
-        </SidebarProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <main className="flex flex-1 flex-col">{children}</main>
+            </SidebarInset>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

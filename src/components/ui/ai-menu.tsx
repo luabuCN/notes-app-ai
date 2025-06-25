@@ -44,7 +44,7 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useChat } from '@/components/use-chat';
+import { useChat } from '@/components/editor/use-chat';
 
 import { AIChatEditor } from './ai-chat-editor';
 

@@ -6,9 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "tauri": "tauri dev",
-    "tauri-build": "tauri build"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
