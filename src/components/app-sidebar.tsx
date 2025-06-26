@@ -1,4 +1,4 @@
-import { Heart, Notebook, Star, ImageUp, Search, Recycle, History, Network, ScanFace, Settings } from "lucide-react"
+import {  Notebook, Star, ImageUp, Search, ScanFace, Settings,Sparkles,PencilRuler,CircleCheckBig } from "lucide-react"
  
 import {
   Sidebar,
@@ -15,15 +15,30 @@ import {
 // Menu items.
 const items = [
   {
+    title: "搜索",
+    url: "#",
+    icon: Search,
+  },
+  {
+    title: "待办清单",
+    url: "#",
+    icon: CircleCheckBig,
+  },
+  {
+    title: "Ai",
+    url: "#",
+    icon: Sparkles,
+  },
+  {
     title: "笔记",
     url: "/editor",
-    icon: Heart,
+    icon: Notebook,
     isActive: true,
   },
   {
-    title: "文章",
+    title: "画板",
     url: "/article",
-    icon: Notebook,
+    icon: PencilRuler,
   },
   {
     title: "收藏",
@@ -31,29 +46,9 @@ const items = [
     icon: Star,
   },
   {
-    title: "图床",
+    title: "资源",
     url: "#",
     icon: ImageUp,
-  },
-  {
-    title: "搜索",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "回收站",
-    url: "#",
-    icon: Recycle,
-  },
-  {
-    title: "历史",
-    url: "#",
-    icon: History,
-  },
-  {
-    title: "平台",
-    url: "#",
-    icon: Network,
   },
 ]
  
