@@ -1,5 +1,8 @@
-import {  Notebook, Star, ImageUp, Search, ScanFace, Settings,Sparkles,PencilRuler,CircleCheckBig } from "lucide-react"
- 
+"use client"
+
+import {  Notebook, Star, ImageUp, Search, Settings,Sparkles,PencilRuler,CircleCheckBig } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { usePathname } from 'next/navigation'
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +14,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
- import { ModeToggle } from './ThemeModelToggle'
+import { ModeToggle } from './theme-model-toggle'
+import { AvatarDrop } from './avatar-drop'
+// import { LocaleSwitch } from './locale-switch'
+import { cn } from "@/lib/utils"
 // Menu items.
 const items = [
   {
@@ -26,7 +32,7 @@ const items = [
   },
   {
     title: "Ai",
-    url: "#",
+    url: "/ai",
     icon: Sparkles,
   },
   {
@@ -53,20 +59,20 @@ const items = [
 ]
  
 export function AppSidebar() {
+  const isMobile = useIsMobile();
+  const pathname = usePathname();
   return (
     <Sidebar 
       collapsible="none"
-      className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r h-screen"
+      className="md:!w-[calc(var(--sidebar-width)_+_1px)] !w-[calc(var(--sidebar-width-icon)_+_1px)] border-r h-screen"
     >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <ScanFace className="size-5" />
-                </div>
-              </a>
+            <SidebarMenuButton size="lg" asChild >
+              <div className="w-full h-full flex justify-center items-center">
+                <AvatarDrop />
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -76,12 +82,15 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem
+                  key={item.title}
+                  className={item.url === pathname ? 'bg-sidebar-accent text-sidebar-accent-foreground ' : ''}
+                >
                   <SidebarMenuButton
                     asChild
                     tooltip={{
                       children: item.title,
-                      hidden: false,
+                      hidden: isMobile ? false : true,
                     }}
                   >
                     <a href={item.url}>
@@ -96,11 +105,45 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ModeToggle/>
-        <SidebarMenuButton asChild className="md:h-8 md:p-0"
+       
+        <SidebarMenuButton asChild 
+          tooltip={{
+            children: '主题切换',
+            hidden: isMobile ? false : true,
+          }}
+        >
+          <a href="#">
+            <div className={
+              cn(
+                "flex w-full ",
+                isMobile ? "items-center justify-center" : ""
+              )
+            }>
+              <ModeToggle/>
+            </div>
+          </a>
+        </SidebarMenuButton>
+        {/* <SidebarMenuButton asChild 
+          tooltip={{
+            children: '语言切换',
+            hidden: isMobile ? false : true,
+          }}
+        >
+          <a href="#">
+            <div className={
+              cn(
+                "flex w-full ",
+                isMobile ? "items-center justify-center" : ""
+              )
+            }>
+              <LocaleSwitch/>
+            </div>
+          </a>
+        </SidebarMenuButton> */}
+        <SidebarMenuButton asChild 
           tooltip={{
             children: '设置',
-            hidden: false,
+            hidden: isMobile ? false : true,
           }}
         >
           <a href="#">
