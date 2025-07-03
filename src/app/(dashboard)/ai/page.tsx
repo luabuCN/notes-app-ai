@@ -1,45 +1,66 @@
-"use client";
+"use client"
 
 import { useChat } from "@ai-sdk/react";
+import { ChatInput } from "./component/chat-input";
+import { Conversation } from "./component/conversation";
+import { useCallback, useEffect, useMemo } from "react";
 
-export default function Chat() {
-  const { messages, input, setInput, append } = useChat({
+export default function AiPage() {
+  const {
+    messages,
+    input,
+    status,
+    reload,
+    setMessages,
+    setInput,
+    append,
+  } = useChat({
     api: "/api/ai/chat",
   });
-  return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.map((message) => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part, i) => {
-            switch (part.type) {
-              case "text":
-                return <div key={`${message.id}-${i}`}>{part.text}</div>;
-              case "tool-invocation":
-                return (
-                  <pre key={`${message.id}-${i}`}>
-                    {JSON.stringify(part.toolInvocation, null, 2)}
-                  </pre>
-                );
-            }
-          })}
-        </div>
-      ))}
+  const handleDelete = useCallback(
+    (id: string) => {
+      setMessages(messages.filter((message) => message.id !== id))
+    },
+    [messages, setMessages]
+  )
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          append({ content: input, role: "user" });
-          setInput("");
-        }}
-      >
-        <input
-          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
-          value={input}
-          placeholder="Say something..."
-          onChange={(e) => setInput(e.target.value)}
-        />
-      </form>
+  const handleEdit = useCallback(
+    (id: string, newText: string) => {
+      setMessages(
+        messages.map((message) =>
+          message.id === id ? { ...message, content: newText } : message
+        )
+      )
+    },
+    [messages, setMessages]
+  )
+  const conversationProps = useMemo(
+    () => ({
+      messages,
+      status,
+      onDelete: handleDelete,
+      onEdit: handleEdit,
+      onReload: reload,
+    }),
+    []
+  );
+  const chatInputProps = useMemo(
+    () => ({
+      input,
+      setInput,
+      append,
+      status,
+    }),
+    [input, setInput, append, status]
+  );
+  useEffect(() => {
+    console.log(status,'status');
+    
+  },[status])
+  return (
+    <div className="flex flex-col h-full w-full items-center justify-center">
+      <Conversation {...conversationProps} />
+      <ChatInput {...chatInputProps} />
     </div>
   );
 }
