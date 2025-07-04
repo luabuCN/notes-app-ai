@@ -50,6 +50,7 @@ export default function AiPage() {
       setInput,
       append,
       status,
+      hasHistory: messages.length > 0,
     }),
     [input, setInput, append, status]
   );

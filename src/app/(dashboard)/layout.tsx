@@ -10,7 +10,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main className="flex flex-1 flex-col">{children}</main>
+        {children}
       </SidebarInset>
     </SidebarProvider>
   );
