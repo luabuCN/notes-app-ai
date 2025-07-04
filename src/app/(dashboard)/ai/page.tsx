@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { ChatInput } from "./component/chat-input";
 import { Conversation } from "./component/conversation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 export default function AiPage() {
   const {
@@ -42,7 +42,7 @@ export default function AiPage() {
       onEdit: handleEdit,
       onReload: reload,
     }),
-    []
+    [messages, status, handleDelete, handleEdit, reload]
   );
   const chatInputProps = useMemo(
     () => ({
@@ -53,10 +53,6 @@ export default function AiPage() {
     }),
     [input, setInput, append, status]
   );
-  useEffect(() => {
-    console.log(status,'status');
-    
-  },[status])
   return (
     <div className="flex flex-col h-full w-full items-center justify-center">
       <Conversation {...conversationProps} />
