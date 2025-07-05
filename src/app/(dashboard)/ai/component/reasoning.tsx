@@ -3,7 +3,7 @@
 
 import { Markdown } from "@/components/ui/markdown";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 

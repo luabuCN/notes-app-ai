@@ -55,7 +55,7 @@ export default function AiPage() {
     [input, setInput, append, status]
   );
   return (
-    <div className="flex flex-col h-full w-full items-center justify-center">
+    <div className="flex flex-col h-full w-full items-center justify-center px-4">
       <Conversation {...conversationProps} />
       <ChatInput {...chatInputProps} />
     </div>

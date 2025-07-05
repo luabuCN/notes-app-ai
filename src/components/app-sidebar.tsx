@@ -1,6 +1,6 @@
 "use client"
 
-import {  Notebook, Star, ImageUp, Search, Settings,Sparkles,PencilRuler,CircleCheckBig } from "lucide-react"
+import { Notebook, Star, ImageUp, Search, Settings, Sparkles, PencilRuler, CircleCheckBig } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
 import {
@@ -57,12 +57,12 @@ const items = [
     icon: ImageUp,
   },
 ]
- 
+
 export function AppSidebar() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
   return (
-    <Sidebar 
+    <Sidebar
       collapsible="none"
       className="md:!w-[calc(var(--sidebar-width)_+_1px)] !w-[calc(var(--sidebar-width-icon)_+_1px)] border-r h-screen"
     >
@@ -105,8 +105,8 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-       
-        <SidebarMenuButton asChild 
+
+        <SidebarMenuButton asChild
           tooltip={{
             children: '主题切换',
             hidden: isMobile ? false : true,
@@ -119,7 +119,7 @@ export function AppSidebar() {
                 isMobile ? "items-center justify-center" : ""
               )
             }>
-              <ModeToggle/>
+              <ModeToggle />
             </div>
           </a>
         </SidebarMenuButton>
@@ -140,14 +140,14 @@ export function AppSidebar() {
             </div>
           </a>
         </SidebarMenuButton> */}
-        <SidebarMenuButton asChild 
+        <SidebarMenuButton asChild
           tooltip={{
             children: '设置',
             hidden: isMobile ? false : true,
           }}
         >
           <a href="#">
-            <div className="flex size-8 items-center justify-center rounded-lg">
+            <div className="flex size-8 items-center w-full justify-center rounded-lg">
               <Settings className="size-4" />
             </div>
           </a>

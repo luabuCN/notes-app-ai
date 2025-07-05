@@ -29,8 +29,9 @@ export function ChatInput({ input, setInput, append, status, hasHistory }: ChatI
   const { data, isPending } = useSession();
   const user = data?.user;
   const handleSubmit = () => {
+    if (!input) return;
     append({ content: input, role: "user" });
-    setInput('')
+    setInput('');
   }
 
   const handleValueChange = (val: string) => {
@@ -62,7 +63,7 @@ export function ChatInput({ input, setInput, append, status, hasHistory }: ChatI
               onClick={handleSubmit}
             >
               {status === "submitted" ? (
-                <Square className="size-5 fill-current" />
+                <Square className="size-3 fill-current" />
               ) : (
                 <ArrowUp className="size-5" />
               )}
@@ -70,7 +71,7 @@ export function ChatInput({ input, setInput, append, status, hasHistory }: ChatI
           </PromptInputAction>
         </PromptInputActions>
       </PromptInput>
-      {!hasHistory && <div className="flex flex-wrap gap-2 mt-4  max-w-(--breakpoint-md)">
+      {!hasHistory && <div className="flex flex-wrap gap-2 mt-4 justify-center max-w-(--breakpoint-md)">
         <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
           Tell me a joke
         </PromptSuggestion>

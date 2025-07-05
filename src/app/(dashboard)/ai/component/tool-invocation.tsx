@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 import type { ToolInvocationUIPart } from "@ai-sdk/ui-utils"
 
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion } from "motion/react"
 import { CheckCircle, ChevronDown, Code, Link, Loader, Nut, Wrench } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -243,21 +243,21 @@ function SingleToolCard({
   // Format the arguments for display
   const formattedArgs = args
     ? Object.entries(args).map(([key, value]) => (
-        <div key={key} className="mb-1">
-          <span className="text-muted-foreground font-medium">{key}:</span>{" "}
-          <span className="font-mono">
-            {typeof value === "object"
-              ? value === null
-                ? "null"
-                : Array.isArray(value)
-                  ? value.length === 0
-                    ? "[]"
-                    : JSON.stringify(value)
+      <div key={key} className="mb-1">
+        <span className="text-muted-foreground font-medium">{key}:</span>{" "}
+        <span className="font-mono">
+          {typeof value === "object"
+            ? value === null
+              ? "null"
+              : Array.isArray(value)
+                ? value.length === 0
+                  ? "[]"
                   : JSON.stringify(value)
-              : String(value)}
-          </span>
-        </div>
-      ))
+                : JSON.stringify(value)
+            : String(value)}
+        </span>
+      </div>
+    ))
     : null
 
   // Render generic results based on their structure
