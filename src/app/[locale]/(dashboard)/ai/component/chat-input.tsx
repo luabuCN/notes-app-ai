@@ -14,6 +14,7 @@ import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
 import { Dispatch, SetStateAction } from "react";
 import { ChatRequestOptions } from "ai";
+import { useTranslations } from "next-intl";
 
 type ChatInputProps = {
   input: string;
@@ -23,6 +24,7 @@ type ChatInputProps = {
 }
 
 export  function ChatInput({input, setInput, append, status}:ChatInputProps) {
+  const t = useTranslations('ai');
 
   const { data, isPending } = useSession();
   const user = data?.user;
@@ -37,7 +39,7 @@ export  function ChatInput({input, setInput, append, status}:ChatInputProps) {
   return (
    <>
     <div className="flex items-center justify-center mb-4">
-      <span className="text-2xl text-gray-500 flex items-center gap-2">👋 你好 {isPending ? <Loader2 className="animate-spin size-4"/> : user?.name} 我是你的 AI 助手</span>
+      <span className="text-2xl text-gray-500 flex items-center gap-2">👋 {t('hello')} {isPending ? <Loader2 className="animate-spin size-4"/> : user?.name} {t('assistant')}</span>
     </div>
      <PromptInput
       value={input}
@@ -46,7 +48,7 @@ export  function ChatInput({input, setInput, append, status}:ChatInputProps) {
       onSubmit={handleSubmit}
       className="w-full max-w-(--breakpoint-md)"
     >
-      <PromptInputTextarea placeholder="有什么可以帮助你的吗？" />
+      <PromptInputTextarea placeholder={t('inputPlaceholder')} />
       <PromptInputActions className="justify-end pt-2">
         <PromptInputAction
           tooltip={status === "submitted" ? "Stop generation" : "Send message"}

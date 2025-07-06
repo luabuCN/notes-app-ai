@@ -1,4 +1,10 @@
 {
   "greeting": "你好",
-  "welcome": "欢迎使用 AI 笔记应用！"
+  "welcome": "欢迎使用 AI 笔记应用！",
+  "HomePage": "首页",
+  "ai": {
+    "hello":"你好!",
+    "assistant":"我是你的 AI 助手",
+    "inputPlaceholder":"有什么可以帮助你的吗？"
+  }
 }

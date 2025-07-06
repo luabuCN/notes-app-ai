@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ModeToggle } from './theme-model-toggle'
 import { AvatarDrop } from './avatar-drop'
-// import { LocaleSwitch } from './locale-switch'
+import { LocaleModelToggle } from './locale-model-toggle'
 import { cn } from "@/lib/utils"
 // Menu items.
 const items = [
@@ -123,7 +123,7 @@ export function AppSidebar() {
             </div>
           </a>
         </SidebarMenuButton>
-        {/* <SidebarMenuButton asChild 
+        <SidebarMenuButton asChild 
           tooltip={{
             children: '语言切换',
             hidden: isMobile ? false : true,
@@ -133,13 +133,13 @@ export function AppSidebar() {
             <div className={
               cn(
                 "flex w-full ",
-                isMobile ? "items-center justify-center" : ""
+                isMobile ? "items-center justify-center ml-0" : "ml-[10px]"
               )
             }>
-              <LocaleSwitch/>
+              <LocaleModelToggle/>
             </div>
           </a>
-        </SidebarMenuButton> */}
+        </SidebarMenuButton>
         <SidebarMenuButton asChild 
           tooltip={{
             children: '设置',
