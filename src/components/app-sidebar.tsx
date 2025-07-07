@@ -63,15 +63,15 @@ const items = [
 export function AppSidebar() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
-  const [pathWithoutLocale ,setPathWithoutLocale] = useState<string>()
+  const [pathWithoutLocale, setPathWithoutLocale] = useState<string>()
   //去除国际化的路径
-  
+
   useEffect(() => {
     const path = pathname.replace(/^\/(zh|en)(?=\/|$)/, '');
-    console.log(path,'path--------');
-    
+    console.log(path, 'path--------');
+
     setPathWithoutLocale(path)
-  },[pathname])
+  }, [pathname])
   return (
     <Sidebar
       collapsible="none"
@@ -134,24 +134,19 @@ export function AppSidebar() {
             </div>
           </a>
         </SidebarMenuButton>
-        <SidebarMenuButton asChild 
+        <SidebarMenuButton asChild
           tooltip={{
             children: '语言切换',
             hidden: isMobile ? false : true,
           }}
         >
           <a href="#">
-            <div className={
-              cn(
-                "flex w-full ",
-                isMobile ? "items-center justify-center ml-0" : "ml-[33px]"
-              )
-            }>
-              <LocaleModelToggle/>
+            <div className="flex w-full items-center justify-center">
+              <LocaleModelToggle />
             </div>
           </a>
         </SidebarMenuButton>
-        <SidebarMenuButton asChild 
+        <SidebarMenuButton asChild
           tooltip={{
             children: '设置',
             hidden: isMobile ? false : true,

@@ -15,83 +15,88 @@ import { CreateMessage, Message } from "@ai-sdk/react";
 import { Dispatch, SetStateAction } from "react";
 import { ChatRequestOptions } from "ai";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 type ChatInputProps = {
   input: string;
   setInput: Dispatch<SetStateAction<string>>;
   append: (message: Message | CreateMessage, chatRequestOptions?: ChatRequestOptions) => Promise<string | null | undefined>;
   status: "streaming" | "ready" | "submitted" | "error";
+  hasHistory: boolean;
 }
 
-export  function ChatInput({input, setInput, append, status}:ChatInputProps) {
+export function ChatInput({ input, setInput, append, status, hasHistory }: ChatInputProps) {
   const t = useTranslations('ai');
 
   const { data, isPending } = useSession();
   const user = data?.user;
   const handleSubmit = () => {
+    if (!input.trim()) return;
     append({ content: input, role: "user" });
     setInput('')
   }
 
-  const handleValueChange = (val:string) => {
+  const handleValueChange = (val: string) => {
     setInput(val)
   }
   return (
-   <>
-    <div className="flex items-center justify-center mb-4">
-      <span className="text-2xl text-gray-500 flex items-center gap-2">👋 {t('hello')} {isPending ? <Loader2 className="animate-spin size-4"/> : user?.name} {t('assistant')}</span>
-    </div>
-     <PromptInput
-      value={input}
-      onValueChange={handleValueChange}
-      isLoading={status === "submitted"}
-      onSubmit={handleSubmit}
-      className="w-full max-w-(--breakpoint-md)"
-    >
-      <PromptInputTextarea placeholder={t('inputPlaceholder')} />
-      <PromptInputActions className="justify-end pt-2">
-        <PromptInputAction
-          tooltip={status === "submitted" ? "Stop generation" : "Send message"}
-        >
-          <Button
-            variant="default"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={handleSubmit}
+    <div className={cn("w-full max-w-3xl z-10 py-2",
+      hasHistory ? 'absolute bottom-0 left-1/2 -translate-x-1/2' : ''
+    )}>
+      {!hasHistory && <div className="flex items-center justify-center mb-4">
+        <span className="text-2xl text-gray-500 flex items-center gap-2">👋 {t('hello')} {isPending ? <Loader2 className="animate-spin size-4" /> : user?.name} {t('assistant')}</span>
+      </div>}
+      <PromptInput
+        value={input}
+        onValueChange={handleValueChange}
+        isLoading={status === "submitted"}
+        onSubmit={handleSubmit}
+        className="w-full max-w-(--breakpoint-md)"
+      >
+        <PromptInputTextarea placeholder={t('inputPlaceholder')} />
+        <PromptInputActions className="justify-end pt-2">
+          <PromptInputAction
+            tooltip={status === "submitted" ? "Stop generation" : "Send message"}
           >
-            {status === "submitted" ? (
-              <Square className="size-5 fill-current" />
-            ) : (
-              <ArrowUp className="size-5" />
-            )}
-          </Button>
-        </PromptInputAction>
-      </PromptInputActions>
-    </PromptInput>
-     <div className="flex flex-wrap gap-2 mt-4  max-w-(--breakpoint-md)">
-     <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
-       Tell me a joke
-     </PromptSuggestion>
+            <Button
+              variant="default"
+              size="icon"
+              className="h-8 w-8 rounded-full"
+              onClick={handleSubmit}
+            >
+              {status === "submitted" ? (
+                <Square className="size-3 fill-current" />
+              ) : (
+                <ArrowUp className="size-5" />
+              )}
+            </Button>
+          </PromptInputAction>
+        </PromptInputActions>
+      </PromptInput>
+      {!hasHistory && <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-(--breakpoint-md)">
+        <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
+          Tell me a joke
+        </PromptSuggestion>
 
-     <PromptSuggestion onClick={() => setInput("How does this work?")}>
-       How does this work?
-     </PromptSuggestion>
+        <PromptSuggestion onClick={() => setInput("How does this work?")}>
+          How does this work?
+        </PromptSuggestion>
 
-     <PromptSuggestion
-       onClick={() => setInput("Generate an image of a cat")}
-     >
-       Generate an image of a cat
-     </PromptSuggestion>
+        <PromptSuggestion
+          onClick={() => setInput("Generate an image of a cat")}
+        >
+          Generate an image of a cat
+        </PromptSuggestion>
 
-     <PromptSuggestion onClick={() => setInput("Write a poem")}>
-       Write a poem
-     </PromptSuggestion>
-     <PromptSuggestion
-       onClick={() => setInput("Code a React component")}
-     >
-       Code a React component
-     </PromptSuggestion>
-   </div>
-   </>
+        <PromptSuggestion onClick={() => setInput("Write a poem")}>
+          Write a poem
+        </PromptSuggestion>
+        <PromptSuggestion
+          onClick={() => setInput("Code a React component")}
+        >
+          Code a React component
+        </PromptSuggestion>
+      </div>}
+    </div>
   )
 }
