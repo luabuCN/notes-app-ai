@@ -14,7 +14,6 @@ export async function middleware(request: NextRequest) {
   const pathWithoutLocale = pathname.replace(/^\/(zh|en)(?=\/|$)/, '');
   const localeMatch = pathname.match(/^\/(zh|en)(?=\/|$)/);
   const localePrefix = localeMatch ? localeMatch[0] : '';
-  console.log('pathWithoutLocale', pathWithoutLocale);
   
   // 登录校验
   if (pathWithoutLocale !== '/' && pathWithoutLocale !== '/signin' && pathWithoutLocale !== '/signup' && pathWithoutLocale !== '') {

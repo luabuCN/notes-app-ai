@@ -18,6 +18,8 @@ import { ModeToggle } from './theme-model-toggle'
 import { AvatarDrop } from './avatar-drop'
 import { LocaleModelToggle } from './locale-model-toggle'
 import { cn } from "@/lib/utils"
+import { Link } from '@/i18n/navigation'
+import { useEffect, useState } from "react"
 // Menu items.
 const items = [
   {
@@ -61,6 +63,15 @@ const items = [
 export function AppSidebar() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
+  const [pathWithoutLocale ,setPathWithoutLocale] = useState<string>()
+  //去除国际化的路径
+  
+  useEffect(() => {
+    const path = pathname.replace(/^\/(zh|en)(?=\/|$)/, '');
+    console.log(path,'path--------');
+    
+    setPathWithoutLocale(path)
+  },[pathname])
   return (
     <Sidebar
       collapsible="none"
@@ -84,7 +95,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem
                   key={item.title}
-                  className={item.url === pathname ? 'bg-sidebar-accent text-sidebar-accent-foreground ' : ''}
+                  className={item.url === pathWithoutLocale ? 'bg-sidebar-accent text-sidebar-accent-foreground ' : ''}
                 >
                   <SidebarMenuButton
                     asChild
@@ -93,10 +104,10 @@ export function AppSidebar() {
                       hidden: isMobile ? false : true,
                     }}
                   >
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -133,7 +144,7 @@ export function AppSidebar() {
             <div className={
               cn(
                 "flex w-full ",
-                isMobile ? "items-center justify-center ml-0" : "ml-[10px]"
+                isMobile ? "items-center justify-center ml-0" : "ml-[33px]"
               )
             }>
               <LocaleModelToggle/>

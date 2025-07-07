@@ -1,7 +1,10 @@
+import { useTranslations } from "next-intl";
+
 export default function HomePage() {
+  const t = useTranslations();
   return (
     <div>
-      首页
+      { t('HomePage')}
     </div>
   );
 }
