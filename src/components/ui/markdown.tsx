@@ -1,16 +1,11 @@
-import { cn } from "@/lib/utils"
 import { marked } from "marked"
 import { memo, useId, useMemo } from "react"
-import ReactMarkdown, { Components } from "react-markdown"
-import remarkBreaks from "remark-breaks"
-import remarkGfm from "remark-gfm"
-import { CodeBlock, CodeBlockCode } from "./code-block"
+import { Markdown as LobehubMarkdown, MarkdownProps as LobehubMarkdownProps } from '@lobehub/ui';
 
 export type MarkdownProps = {
   children: string
   id?: string
   className?: string
-  components?: Partial<Components>
 }
 
 function parseMarkdownIntoBlocks(markdown: string): string[] {
@@ -18,64 +13,27 @@ function parseMarkdownIntoBlocks(markdown: string): string[] {
   return tokens.map((token) => token.raw)
 }
 
-function extractLanguage(className?: string): string {
-  if (!className) return "plaintext"
-  const match = className.match(/language-(\w+)/)
-  return match ? match[1] : "plaintext"
-}
-
-const INITIAL_COMPONENTS: Partial<Components> = {
-  code: function CodeComponent({ className, children, ...props }) {
-    const isInline =
-      !props.node?.position?.start.line ||
-      props.node?.position?.start.line === props.node?.position?.end.line
-
-    if (isInline) {
-      return (
-        <span
-          className={cn(
-            "bg-primary-foreground rounded-sm px-1 font-mono text-sm",
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </span>
-      )
-    }
-
-    const language = extractLanguage(className)
-
-    return (
-      <CodeBlock className={className}>
-        <CodeBlockCode code={children as string} language={language} />
-      </CodeBlock>
-    )
-  },
-  pre: function PreComponent({ children }) {
-    return <>{children}</>
-  },
-}
-
 const MemoizedMarkdownBlock = memo(
   function MarkdownBlock({
     content,
-    components = INITIAL_COMPONENTS,
   }: {
     content: string
-    components?: Partial<Components>
   }) {
+
+    const options: LobehubMarkdownProps =
+    {
+      allowHtml: true,
+      fontSize: 16,
+      children: content,
+      fullFeaturedCodeBlock: true,
+      headerMultiple: 0.25,
+      lineHeight: 1.4,
+      marginMultiple: 1,
+    }
+
     return (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
-        components={components}
-      >
-        {content}
-      </ReactMarkdown>
+      <LobehubMarkdown {...options} />
     )
-  },
-  function propsAreEqual(prevProps, nextProps) {
-    return prevProps.content === nextProps.content
   }
 )
 
@@ -85,7 +43,6 @@ function MarkdownComponent({
   children,
   id,
   className,
-  components = INITIAL_COMPONENTS,
 }: MarkdownProps) {
   const generatedId = useId()
   const blockId = id ?? generatedId
@@ -97,7 +54,6 @@ function MarkdownComponent({
         <MemoizedMarkdownBlock
           key={`${blockId}-block-${index}`}
           content={block}
-          components={components}
         />
       ))}
     </div>

@@ -61,7 +61,7 @@ export function ChatInput({ input, setInput, append, status, hasHistory }: ChatI
             <Button
               variant="default"
               size="icon"
-              className="h-8 w-8 rounded-full"
+              className="h-8 w-8 rounded-full cursor-pointer"
               onClick={handleSubmit}
             >
               {status === "submitted" ? (

@@ -156,7 +156,7 @@
   .overflow-x-auto,
   .overflow-x-scroll,
   .overflow-y-auto,
-  .overflow-y-scroll {
+  .overflow-y-scroll,*::-webkit-scrollbar {
     scrollbar-color: var(--color-gray-300) transparent;
   }
 }
