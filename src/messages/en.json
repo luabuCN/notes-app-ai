@@ -1,4 +1,10 @@
 {
   "greeting": "Hello",
-  "welcome": "Welcome to the AI Notes App!"
+  "welcome": "Welcome to the AI Notes App!",
+  "HomePage":"Home Page",
+  "ai": {
+    "hello":"Hello!",
+    "assistant":"I'm your AI assistant",
+    "inputPlaceholder":"What can I do for you"
+  }
 }
