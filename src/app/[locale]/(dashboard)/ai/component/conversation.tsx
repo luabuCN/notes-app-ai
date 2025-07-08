@@ -26,8 +26,6 @@ export function Conversation({
   onReload,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
-
-
   if (!messages || messages.length === 0)
     return <></>
 

@@ -3,7 +3,9 @@
 import { useChat } from "@ai-sdk/react";
 import { ChatInput } from "./component/chat-input";
 import { Conversation } from "./component/conversation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import React from "react";
+import { toast } from "sonner";
 
 export default function AiPage() {
   const {
@@ -17,6 +19,7 @@ export default function AiPage() {
   } = useChat({
     api: "/api/ai/chat",
   });
+
   const handleDelete = useCallback(
     (id: string) => {
       setMessages(messages.filter((message) => message.id !== id))
@@ -44,6 +47,12 @@ export default function AiPage() {
     }),
     [messages, status, handleDelete, handleEdit, reload]
   );
+
+  useEffect(() => {
+    if(status === 'error') {
+      toast.warning('出现错误，请稍后重试', { style: { color: 'red' } })
+    }
+  },[status])
   const chatInputProps = useMemo(
     () => ({
       input,
@@ -52,7 +61,7 @@ export default function AiPage() {
       status,
       hasHistory: messages.length > 0,
     }),
-    [input, setInput, append, status]
+    [input, setInput, append, status, messages]
   );
   return (
     <div className="flex flex-col h-full w-full items-center justify-center relative">

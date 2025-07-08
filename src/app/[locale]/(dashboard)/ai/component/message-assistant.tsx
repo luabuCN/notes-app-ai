@@ -3,26 +3,26 @@ import {
   MessageAction,
   MessageActions,
   MessageContent,
-} from "@/components/ui/message"
-import { cn } from "@/lib/utils"
-import type { Message as MessageAISDK } from "@ai-sdk/react"
-import { getSources } from "./get-sources"
-import { Reasoning } from "./reasoning"
-import { SourcesList } from "./sources-list"
-import { ToolInvocation } from "./tool-invocation"
-import { Check, Copy, RotateCw } from "lucide-react"
+} from "@/components/ui/message";
+import { cn } from "@/lib/utils";
+import type { Message as MessageAISDK } from "@ai-sdk/react";
+import { getSources } from "./get-sources";
+import { Reasoning } from "./reasoning";
+import { SourcesList } from "./sources-list";
+import { ToolInvocation } from "./tool-invocation";
+import { Check, Copy, RotateCw } from "lucide-react";
 
 type MessageAssistantProps = {
-  children: string
-  isLast?: boolean
-  hasScrollAnchor?: boolean
-  copied?: boolean
-  copyToClipboard?: () => void
-  onReload?: () => void
-  parts?: MessageAISDK["parts"]
-  status?: "streaming" | "ready" | "submitted" | "error"
-  className?: string
-}
+  children: string;
+  isLast?: boolean;
+  hasScrollAnchor?: boolean;
+  copied?: boolean;
+  copyToClipboard?: () => void;
+  onReload?: () => void;
+  parts?: MessageAISDK["parts"];
+  status?: "streaming" | "ready" | "submitted" | "error";
+  className?: string;
+};
 
 export function MessageAssistant({
   children,
@@ -35,14 +35,13 @@ export function MessageAssistant({
   status,
   className,
 }: MessageAssistantProps) {
-
-  const sources = getSources(parts)
+  const sources = getSources(parts);
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
-  )
-  const reasoningParts = parts?.find((part) => part.type === "reasoning")
-  const contentNullOrEmpty = children === null || children === ""
-  const isLastStreaming = status === "streaming" && isLast
+  );
+  const reasoningParts = parts?.find((part) => part.type === "reasoning");
+  const contentNullOrEmpty = children === null || children === "";
+  const isLastStreaming = status === "streaming" && isLast;
 
   return (
     <Message
@@ -52,6 +51,8 @@ export function MessageAssistant({
         className
       )}
     >
+     
+
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
         {reasoningParts && reasoningParts.reasoning && (
           <Reasoning
@@ -60,12 +61,9 @@ export function MessageAssistant({
           />
         )}
 
-        {toolInvocationParts &&
-          toolInvocationParts.length > 0 && (
-            <ToolInvocation toolInvocations={toolInvocationParts} />
-          )}
-
-    
+        {toolInvocationParts && toolInvocationParts.length > 0 && (
+          <ToolInvocation toolInvocations={toolInvocationParts} />
+        )}
 
         {contentNullOrEmpty ? null : (
           <MessageContent
@@ -124,5 +122,5 @@ export function MessageAssistant({
         )}
       </div>
     </Message>
-  )
+  );
 }

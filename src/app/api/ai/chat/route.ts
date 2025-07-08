@@ -11,9 +11,14 @@ export async function POST(req: Request) {
     apiKey:process.env.OPENAI_API_KEY,
     baseURL: "https://api.chatanywhere.tech",
   });
+  // const openai = createOpenAI({
+  //   apiKey:'sk-DVtXLOow5mga5ut90k7NlCNXFshOwzJdRPD0dvRauU1yBckA',
+  //   baseURL: "https://api.poixe.com",
+  // });
 
   const result = streamText({
-    model: openai('gpt-4o'),
+    // model: openai('gpt-4o'),
+    model: openai('deepseek/deepseek-r1-0528:free'),
     messages,
     tools: {
       weather: tool({

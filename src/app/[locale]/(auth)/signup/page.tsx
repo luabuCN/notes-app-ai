@@ -14,7 +14,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Loader2, X } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
@@ -41,7 +41,6 @@ export default function SignUp() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,10 +78,7 @@ export default function SignUp() {
             setLoading(true);
           },
           onError: (ctx) => {
-            toast({
-              variant: "destructive",
-              description: ctx.error.message,
-            });
+            toast("发生错误：" + ctx.error.message);
           },
           onSuccess: async () => {
             router.push("/signin");
@@ -92,10 +88,7 @@ export default function SignUp() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         // 显示第一个验证错误
-        toast({
-          variant: "destructive",
-          description: error.errors[0].message,
-        });
+        toast("发生错误" + error.errors[0].message)
       }
     }
   };
