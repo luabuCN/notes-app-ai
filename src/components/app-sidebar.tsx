@@ -68,8 +68,6 @@ export function AppSidebar() {
 
   useEffect(() => {
     const path = pathname.replace(/^\/(zh|en)(?=\/|$)/, '');
-    console.log(path, 'path--------');
-
     setPathWithoutLocale(path)
   }, [pathname])
   return (
