@@ -7,14 +7,14 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  // const openai = createOpenAI({
-  //   apiKey:process.env.OPENAI_API_KEY,
-  //   baseURL: "https://api.chatanywhere.tech",
-  // });
   const openai = createOpenAI({
-    apiKey: 'sk-18c1c0a82f1b44b4936e7e0b0da2ae08',
-    baseURL: "https://api.deepseek.com",
+    apiKey:process.env.OPENAI_API_KEY,
+    baseURL: "https://api.chatanywhere.tech",
   });
+  // const openai = createOpenAI({
+  //   apiKey: 'sk-18c1c0a82f1b44b4936e7e0b0da2ae08',
+  //   baseURL: "https://api.deepseek.com",
+  // });
 
   const result = streamText({
     // model: openai('gpt-4o'),

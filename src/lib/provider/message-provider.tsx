@@ -17,7 +17,7 @@ const MessagesContext = createContext<MessagesContextType | null>(null)
 export function useMessages() {
   const context = useContext(MessagesContext)
   if (!context)
-    throw new Error("useMessages must be used within MessagesProvider")
+    throw new Error("错误")
   return context
 }
 

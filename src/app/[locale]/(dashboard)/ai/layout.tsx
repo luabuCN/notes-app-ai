@@ -9,6 +9,7 @@ import {
 } from "@lobehub/ui";
 import { useState } from "react";
 import { Flexbox } from "react-layout-kit";
+import { Sidebar } from "./_component/sidebar";
 
 export default function AiLayout({ children }: { children: React.ReactNode }) {
   const [expand, setExpand] = useState(true);
@@ -18,7 +19,7 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
       <Flexbox
         height={"100%"}
         horizontal
-        style={{ minHeight: 500, position: "relative" }}
+        className="min-h-[500px] relative"
         width={"100%"}
       >
         <DraggablePanel
@@ -27,10 +28,9 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
           onExpandChange={setExpand}
           pin={pin}
           placement="left"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-          }}
+          className="flex flex-col"
+          minWidth={150}
+          maxWidth={300}
         >
           <DraggablePanelContainer style={{ flex: 1 }}>
             <DraggablePanelHeader
@@ -38,9 +38,10 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
               position="left"
               setExpand={setExpand}
               setPin={setPin}
-              title="Header"
             />
-            <DraggablePanelBody>DraggablePanel</DraggablePanelBody>
+            <DraggablePanelBody>
+              <Sidebar/>
+            </DraggablePanelBody>
           </DraggablePanelContainer>
         </DraggablePanel>
         <div className="flex-1 p-[24px]"> {children}</div>
