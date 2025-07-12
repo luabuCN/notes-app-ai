@@ -11,14 +11,14 @@ import { ArrowUp, Loader2, Square } from "lucide-react";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { ChatRequestOptions } from "ai";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { createChat} from "../action/use-create-chat";
-import  { useChatSession } from "@/lib/provider/chat-session-provider"
+import { createChat } from "../action/use-create-chat";
+import { useChatSession } from "@/lib/provider/chat-session-provider"
 import { toast } from "sonner";
 type ChatInputProps = {
   input: string;
@@ -55,7 +55,7 @@ export function ChatInput({
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
       router.push(`/ai/c/${data.id}?firstMessage=${encodeURIComponent(input)}`);
     },
-     onError: (error) => {
+    onError: (error) => {
       console.error('Failed to create chat:', error);
       toast.error('创建对话失败');
     }
@@ -63,9 +63,9 @@ export function ChatInput({
 
   const handleSubmit = () => {
     if (!input.trim()) return;
-    if (!chatId)  {
+    if (!chatId) {
       createConversationMutation.mutate();
-      return; 
+      return;
     }
     append({ content: input, role: "user" });
     setInput("");
@@ -74,6 +74,7 @@ export function ChatInput({
   const handleValueChange = (val: string) => {
     setInput(val);
   };
+
   return (
     <div
       className={cn(
@@ -97,7 +98,7 @@ export function ChatInput({
       <PromptInput
         value={input}
         onValueChange={handleValueChange}
-        isLoading={status === "submitted"}
+        isLoading={status === "submitted" || status === "streaming"}
         onSubmit={handleSubmit}
         className="w-full max-w-(--breakpoint-md)"
       >
@@ -105,7 +106,7 @@ export function ChatInput({
         <PromptInputActions className="justify-end pt-2">
           <PromptInputAction
             tooltip={
-              status === "submitted" ? "Stop generation" : "Send message"
+              (status === "submitted" || status === "streaming") ? "Stop generation" : "Send message"
             }
           >
             <Button
@@ -114,7 +115,7 @@ export function ChatInput({
               className="h-8 w-8 rounded-full cursor-pointer"
               onClick={handleSubmit}
             >
-              {status === "submitted" ? (
+              {(status === "submitted" || status === "streaming") ? (
                 <Square className="size-3 fill-current" />
               ) : (
                 <ArrowUp className="size-5" />

@@ -1,4 +1,5 @@
 "use client";
+
 import { ChatSessionProvider } from "@/lib/provider/chat-session-provider";
 import {
   DraggablePanel,
@@ -7,13 +8,23 @@ import {
   DraggablePanelFooter,
   DraggablePanelHeader,
 } from "@lobehub/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flexbox } from "react-layout-kit";
 import { Sidebar } from "./_component/sidebar";
 
 export default function AiLayout({ children }: { children: React.ReactNode }) {
   const [expand, setExpand] = useState(true);
   const [pin, setPin] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // or a skeleton
+  }
+
   return (
     <ChatSessionProvider>
       <Flexbox
@@ -40,7 +51,7 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
               setPin={setPin}
             />
             <DraggablePanelBody>
-              <Sidebar/>
+              <Sidebar />
             </DraggablePanelBody>
           </DraggablePanelContainer>
         </DraggablePanel>

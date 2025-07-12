@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
-  }
+  },
+  transpilePackages: ['@lobehub/ui'],
 };
 
 export default withNextIntl(nextConfig);
