@@ -5,7 +5,6 @@ import {
   DraggablePanel,
   DraggablePanelBody,
   DraggablePanelContainer,
-  DraggablePanelFooter,
   DraggablePanelHeader,
 } from "@lobehub/ui";
 import { useEffect, useState } from "react";
@@ -55,7 +54,7 @@ export default function AiLayout({ children }: { children: React.ReactNode }) {
             </DraggablePanelBody>
           </DraggablePanelContainer>
         </DraggablePanel>
-        <div className="flex-1 p-[24px]"> {children}</div>
+        <div className="flex-1 p-[24px]">{children}</div>
       </Flexbox>
     </ChatSessionProvider>
   );
