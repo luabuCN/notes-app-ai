@@ -15,19 +15,19 @@ import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
+import { useLocale } from "next-intl";
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const locale = useLocale();
   // 邮箱密码登录
   const handleEmailSignIn = async () => {
     await signIn.email(
       {
         email,
         password,
-        callbackURL: "/dashboard",
+        callbackURL: `/${locale}/ai`,
       },
       {
         onRequest: () => {
@@ -45,7 +45,7 @@ export default function SignIn() {
     await signIn.social(
       {
         provider,
-        callbackURL: "/dashboard",
+        callbackURL: `/${locale}/ai`,
       },
       {
         onRequest: () => {
