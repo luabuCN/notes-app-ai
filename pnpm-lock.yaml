@@ -215,6 +215,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.7
         version: 1.2.7(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@tanstack/react-query':
+        specifier: ^5.81.5
+        version: 5.83.0(react@19.1.0)
       '@udecode/cn':
         specifier: ^48.0.3
         version: 48.0.3(@types/react@19.1.8)(class-variance-authority@0.7.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwind-merge@3.3.1)
@@ -236,6 +239,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      css-what:
+        specifier: ^7.0.0
+        version: 7.0.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -296,6 +302,9 @@ importers:
       react-hook-form:
         specifier: ^7.58.1
         version: 7.59.0(react@19.1.0)
+      react-layout-kit:
+        specifier: ^1.9.1
+        version: 1.9.1(react@19.1.0)
       react-lite-youtube-embed:
         specifier: ^2.5.1
         version: 2.5.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2583,6 +2592,14 @@ packages:
   '@tailwindcss/postcss@4.1.11':
     resolution: {integrity: sha512-q/EAIIpF6WpLhKEuQSEVMZNMIY8KhWoAemZ9eylNAih9jxMGAYPPWBn3I9QL/2jZ+e7OEz/tZkX5HwbBR4HohA==}
 
+  '@tanstack/query-core@5.83.0':
+    resolution: {integrity: sha512-0M8dA+amXUkyz5cVUm/B+zSk3xkQAcuXuz5/Q/LveT4ots2rBpPTZOzd7yJa2Utsf8D2Upl5KyjhHRY+9lB/XA==}
+
+  '@tanstack/react-query@5.83.0':
+    resolution: {integrity: sha512-/XGYhZ3foc5H0VM2jLSD/NyBRIOK4q9kfeml4+0x2DlL6xVuAcVEW+hTlTapAmejObg0i3eNqhkr2dT+eciwoQ==}
+    peerDependencies:
+      react: ^18 || ^19
+
   '@tybys/wasm-util@0.9.0':
     resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
 
@@ -3305,7 +3322,12 @@ packages:
     resolution: {integrity: sha512-nyYonlVcUl2MZCxgz2vdnIiYyS19+/YkN8419EilJuKf0CQpstmooD0heW26aBfQPloHYZXRZJpg9C001npNZA==}
 
   css-what@6.2.0:
-    resolution: {integrity: sha512-NSY/JWiKu0Fa0cPpOJ16FuRKu9vf+tHYJiUpaz5+QNIDssAz8yJK+G6PWoeVg/2qcfcTHl6oW0ApFLZw9JWRTw==}
+    resolution: {integrity: sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==, tarball: https://registry.npmmirror.com/css-what/-/css-what-6.1.0.tgz}
+    engines: {node: '>= 6'}
+    deprecated: '[WARNING] Use 6.1.0 instead of 6.2.0, reason: https://github.com/fb55/css-what/issues/1582'
+
+  css-what@7.0.0:
+    resolution: {integrity: sha512-wD5oz5xibMOPHzy13CyGmogB3phdvcDaB5t0W/Nr5Z2O/agcB8YwOz6e2Lsp10pNDzBoDO9nVa3RGs/2BttpHQ==}
     engines: {node: '>= 6'}
 
   csstype@3.1.3:
@@ -8892,6 +8914,13 @@ snapshots:
       postcss: 8.5.6
       tailwindcss: 4.1.11
 
+  '@tanstack/query-core@5.83.0': {}
+
+  '@tanstack/react-query@5.83.0(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.83.0
+      react: 19.1.0
+
   '@tybys/wasm-util@0.9.0':
     dependencies:
       tslib: 2.8.1
@@ -9763,6 +9792,8 @@ snapshots:
       nth-check: 2.1.1
 
   css-what@6.2.0: {}
+
+  css-what@7.0.0: {}
 
   csstype@3.1.3: {}
 
