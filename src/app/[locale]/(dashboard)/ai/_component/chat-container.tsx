@@ -15,12 +15,12 @@ import { useLocale } from "next-intl";
 
 export function ChatContainer() {
   const { messages: initMessage, isLoading } = useMessages();
-   const { chatId } = useChatSession();
-   const searchParams = useSearchParams();
-   const firstMessage = searchParams?.get('firstMessage');
-   const queryClient = useQueryClient();
-   const locale = useLocale();
-   const lastSavedMessageCountRef = useRef(0);
+  const { chatId } = useChatSession();
+  const searchParams = useSearchParams();
+  const firstMessage = searchParams?.get('firstMessage');
+  const queryClient = useQueryClient();
+  const locale = useLocale();
+  const lastSavedMessageCountRef = useRef(0);
   const { messages, input, status, reload, setMessages, setInput, append } =
     useChat({
       api: "/api/ai/chat",
@@ -29,13 +29,13 @@ export function ChatContainer() {
 
   //保存对话消息
   const saveMessageMutation = useMutation({
-    mutationFn: ({ conversationId, messages }: { conversationId: string, messages: any[] }) => 
+    mutationFn: ({ conversationId, messages }: { conversationId: string, messages: any[] }) =>
       saveMessages(conversationId, messages),
-    onSuccess:() => {
-      queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId],exact: true });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId], exact: true });
 
     },
-     onError: (error) => {
+    onError: (error) => {
       toast.error('保存消息失败');
     }
   })
@@ -48,12 +48,12 @@ export function ChatContainer() {
 
   // 处理首次消息发送
   useEffect(() => {
-    if(!isLoading && firstMessage && messages.length === 0 && chatId) {
-      append({ content: firstMessage, role:"user"});
+    if (!isLoading && firstMessage && messages.length === 0 && chatId) {
+      append({ content: firstMessage, role: "user" });
       window.history.replaceState({}, '', `/${locale}/ai/c/${chatId}`);
     }
-  },[isLoading, firstMessage, messages.length, chatId, append])
-  
+  }, [isLoading, firstMessage, messages.length, chatId, append])
+
   const handleDelete = useCallback(
     (id: string) => {
       setMessages(messages.filter((message) => message.id !== id));
@@ -83,24 +83,24 @@ export function ChatContainer() {
   );
 
   useEffect(() => {
-   if (status === "ready" && chatId && messages.length > 0 && 
+    if (status === "ready" && chatId && messages.length > 0 &&
       messages.length !== lastSavedMessageCountRef.current) {
-    
-    // 确保最后一条消息不是正在生成中的消息
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.content && lastMessage.content.trim() !== '') {
-      saveMessageMutation.mutate({
-        conversationId: chatId,
-        messages: messages
-      });
-      lastSavedMessageCountRef.current = messages.length;
+
+      // 确保最后一条消息不是正在生成中的消息
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.content && lastMessage.content.trim() !== '') {
+        saveMessageMutation.mutate({
+          conversationId: chatId,
+          messages: messages
+        });
+        lastSavedMessageCountRef.current = messages.length;
+      }
     }
-  }
-  
-  if (status === "error") {
-    toast.warning("出现错误，请稍后重试", { style: { color: "red" } });
-  }
-  }, [status, messages,chatId]);
+
+    if (status === "error") {
+      toast.warning("出现错误，请稍后重试", { style: { color: "red" } });
+    }
+  }, [status, messages, chatId]);
 
   const chatInputProps = useMemo(
     () => ({
@@ -109,8 +109,9 @@ export function ChatContainer() {
       append,
       status,
       hasHistory: messages.length > 0,
+      isLoading,
     }),
-    [input, setInput, append, status, messages]
+    [input, setInput, append, status, messages, isLoading]
   );
   return (
     <div className="flex flex-col h-full w-full items-center justify-center relative">

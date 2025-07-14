@@ -9,6 +9,7 @@ import { ScrollButton } from "@/components/ui/scroll-button"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
+import { AnimatePresence, motion } from "motion/react"
 
 type ConversationProps = {
   messages: MessageType[]
@@ -27,7 +28,6 @@ export function Conversation({
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
   if (!messages || messages.length === 0) return <></>
-
   return (
     <div className="relative flex flex-1 min-h-0 w-full flex-col items-center overflow-x-hidden overflow-y-auto pt-6 pb-32">
       <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 mx-auto flex w-full flex-col justify-center">
@@ -69,7 +69,8 @@ export function Conversation({
           {status === "submitted" &&
             messages.length > 0 &&
             messages[messages.length - 1].role === "user" && (
-              <div className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
+              <div
+                className="group min-h-scroll-anchor flex w-full max-w-3xl flex-col items-start gap-2 px-6 pb-2">
                 <Loader />
               </div>
             )}

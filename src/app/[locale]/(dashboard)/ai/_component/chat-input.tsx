@@ -29,6 +29,7 @@ type ChatInputProps = {
   ) => Promise<string | null | undefined>;
   status: "streaming" | "ready" | "submitted" | "error";
   hasHistory: boolean;
+  isLoading: boolean;
 };
 
 export function ChatInput({
@@ -37,6 +38,7 @@ export function ChatInput({
   append,
   status,
   hasHistory,
+  isLoading
 }: ChatInputProps) {
   const t = useTranslations("ai");
 
@@ -79,10 +81,10 @@ export function ChatInput({
     <div
       className={cn(
         "w-full max-w-3xl z-10 py-2",
-        hasHistory ? "absolute bottom-0 left-1/2 -translate-x-1/2" : ""
+        hasHistory || isLoading ? "absolute bottom-0 left-1/2 -translate-x-1/2" : ""
       )}
     >
-      {!hasHistory && (
+      {!hasHistory && !isLoading && (
         <div className="flex items-center justify-center mb-4">
           <span className="text-2xl text-gray-500 flex items-center gap-2">
             👋 {t("hello")}{" "}
@@ -124,7 +126,7 @@ export function ChatInput({
           </PromptInputAction>
         </PromptInputActions>
       </PromptInput>
-      {!hasHistory && (
+      {!hasHistory && !isLoading && (
         <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-(--breakpoint-md)">
           <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
             Tell me a joke

@@ -1,7 +1,7 @@
 "use client";
 
 import { Message as MessageType } from "@ai-sdk/react";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { MessageAssistant } from "./message-assistant";
 import { MessageUser } from "./message-user";
 
@@ -20,7 +20,7 @@ type MessageProps = {
   className?: string;
 };
 
-export function Message({
+function MessageInner({
   variant,
   children,
   id,
@@ -59,8 +59,8 @@ export function Message({
       </MessageUser>
     );
   }
-  
-  if (variant === "assistant" || status === 'error') {
+
+  if (variant === "assistant" || status === "error") {
     return (
       <MessageAssistant
         copied={copied}
@@ -79,3 +79,13 @@ export function Message({
 
   return null;
 }
+
+export const Message = React.memo(MessageInner, (prev, next) => {
+  return (
+    prev.id === next.id &&
+    prev.variant === next.variant &&
+    prev.children === next.children &&
+    prev.status === next.status &&
+    prev.isLast === next.isLast
+  );
+});

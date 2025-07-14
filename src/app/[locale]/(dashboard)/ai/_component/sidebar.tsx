@@ -29,7 +29,7 @@ export function Sidebar() {
   const [inputValue, setInputValue] = React.useState<string>("");
 
   return (
-    <div className="w-full h-full flex flex-col gap-20px space-y-5">
+    <div className="w-full h-full min-w-[150px] overflow-hidden flex flex-col gap-20px space-y-5">
       <div
         className="w-full h-[30px] px-2 flex items-center space-x-2 cursor-pointer hover:bg-gray-100 rounded-sm"
         onClick={() => router.push("/ai")}
@@ -176,11 +176,10 @@ function ChatItem({
             <Button variant="secondary" size="icon" className="size-6">
               <Pen
                 onClick={handleEdit}
-                className={`cursor-pointer transition-opacity ${
-                  updateChatMutation.isPending
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:opacity-70"
-                }`}
+                className={`cursor-pointer transition-opacity ${updateChatMutation.isPending
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:opacity-70"
+                  }`}
                 style={{
                   pointerEvents: updateChatMutation.isPending ? "none" : "auto",
                 }}
@@ -192,24 +191,23 @@ function ChatItem({
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="secondary" size="icon" className="size-6" >
-        <Trash
-          onClick={handleDelete}
-          className={`cursor-pointer transition-opacity ${
-            deleteChat.isPending
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-70"
-          }`}
-          style={{ pointerEvents: deleteChat.isPending ? "none" : "auto" }}
-        />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>删除</p>
-      </TooltipContent>
-    </Tooltip>       
-       
+          <TooltipTrigger asChild>
+            <Button variant="secondary" size="icon" className="size-6" >
+              <Trash
+                onClick={handleDelete}
+                className={`cursor-pointer transition-opacity ${deleteChat.isPending
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:opacity-70"
+                  }`}
+                style={{ pointerEvents: deleteChat.isPending ? "none" : "auto" }}
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>删除</p>
+          </TooltipContent>
+        </Tooltip>
+
       </span>
     </div>
   );
