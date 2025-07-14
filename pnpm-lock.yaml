@@ -239,6 +239,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      css-what:
+        specifier: ^7.0.0
+        version: 7.0.0
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -3319,7 +3322,12 @@ packages:
     resolution: {integrity: sha512-nyYonlVcUl2MZCxgz2vdnIiYyS19+/YkN8419EilJuKf0CQpstmooD0heW26aBfQPloHYZXRZJpg9C001npNZA==}
 
   css-what@6.2.0:
-    resolution: {integrity: sha512-NSY/JWiKu0Fa0cPpOJ16FuRKu9vf+tHYJiUpaz5+QNIDssAz8yJK+G6PWoeVg/2qcfcTHl6oW0ApFLZw9JWRTw==}
+    resolution: {integrity: sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==, tarball: https://registry.npmmirror.com/css-what/-/css-what-6.1.0.tgz}
+    engines: {node: '>= 6'}
+    deprecated: '[WARNING] Use 6.1.0 instead of 6.2.0, reason: https://github.com/fb55/css-what/issues/1582'
+
+  css-what@7.0.0:
+    resolution: {integrity: sha512-wD5oz5xibMOPHzy13CyGmogB3phdvcDaB5t0W/Nr5Z2O/agcB8YwOz6e2Lsp10pNDzBoDO9nVa3RGs/2BttpHQ==}
     engines: {node: '>= 6'}
 
   csstype@3.1.3:
@@ -9785,6 +9793,8 @@ snapshots:
 
   css-what@6.2.0: {}
 
+  css-what@7.0.0: {}
+
   csstype@3.1.3: {}
 
   cytoscape-cose-bilkent@4.1.0(cytoscape@3.32.0):
@@ -10352,7 +10362,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.35.0(eslint@9.30.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.30.0(jiti@2.4.2)))(eslint@9.30.0(jiti@2.4.2)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.35.0(eslint@9.30.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.30.0(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -10374,7 +10384,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.30.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.35.0(eslint@9.30.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.30.0(jiti@2.4.2)))(eslint@9.30.0(jiti@2.4.2))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.35.0(eslint@9.30.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.30.0(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
