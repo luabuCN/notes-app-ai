@@ -2,14 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pen, SquarePen, Trash } from "lucide-react";
-import { getAllChats } from "../action/get-all-chats";
+import { getAllChats } from "../_action/get-all-chats";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Conversation } from "@prisma/client";
 import { useRouter } from "@/i18n/navigation";
-import { delChat } from "../action/use-del-chat";
+import { delChat } from "../_action/use-del-chat";
 import { toast } from "sonner";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
-import { updateChat } from "../action/update-chats";
+import { updateChat } from "../_action/update-chats";
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";

@@ -45,7 +45,7 @@ const items = [
   },
   {
     title: "画板",
-    url: "/article",
+    url: "/draw",
     icon: PencilRuler,
   },
   {
@@ -69,6 +69,8 @@ export function AppSidebar() {
   useEffect(() => {
     const path = pathname.replace(/^\/(zh|en)(?=\/|$)/, '');
     setPathWithoutLocale(path)
+    console.log(path,'path');
+    
   }, [pathname])
   return (
     <Sidebar
@@ -93,7 +95,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem
                   key={item.title}
-                  className={item.url === pathWithoutLocale ? 'bg-sidebar-accent text-sidebar-accent-foreground ' : ''}
+                  className={pathWithoutLocale?.includes(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground ' : ''}
                 >
                   <SidebarMenuButton
                     asChild

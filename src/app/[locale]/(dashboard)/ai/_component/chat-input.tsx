@@ -17,7 +17,7 @@ import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { createChat } from "../action/use-create-chat";
+import { createChat } from "../_action/use-create-chat";
 import { useChatSession } from "@/lib/provider/chat-session-provider"
 import { toast } from "sonner";
 type ChatInputProps = {

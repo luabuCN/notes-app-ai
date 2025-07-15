@@ -24,7 +24,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   conversations Conversation[] 
-
+  excalidraws   Excalidraw[] 
   @@unique([email])
   @@map("user")
 }
@@ -99,4 +99,19 @@ model Message {
   conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@map("message")
+}
+
+model Excalidraw {
+  id         String   @id @default(cuid())
+  title      String   @default("未命名草图")
+  version    Int      @default(1)
+  isDeleted  Boolean  @default(false)
+  data       Json     // 存储草图 JSON 数据
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("excalidraw") // 可选：数据库中表名为 excalidraw
 }

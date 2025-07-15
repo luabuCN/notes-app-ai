@@ -10,7 +10,7 @@ import { useMessages } from "@/lib/provider/message-provider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { useSearchParams } from "next/navigation";
-import { saveMessages } from "../action/use-save-message";
+import { saveMessages } from "../_action/use-save-message";
 import { useLocale } from "next-intl";
 
 export function ChatContainer() {

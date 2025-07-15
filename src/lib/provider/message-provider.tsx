@@ -1,6 +1,6 @@
 "use client"
 
-import { getChatWithMessages } from "@/app/[locale]/(dashboard)/ai/action/use-get-message"
+import { getChatWithMessages } from "@/app/[locale]/(dashboard)/ai/_action/use-get-message"
 import { useChatSession } from "@/lib/provider/chat-session-provider"
 import { useQuery } from "@tanstack/react-query"
 import type { Message as MessageAISDK } from "ai"
