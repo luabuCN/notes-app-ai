@@ -16,7 +16,7 @@ datasource db {
 model User {
   id            String    @id
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean
   image         String?
   createdAt     DateTime
@@ -24,8 +24,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
   conversations Conversation[] 
-  excalidraws   Excalidraw[] 
-  @@unique([email])
+  excalidrawGroups ExcalidrawGroup[]
+
   @@map("user")
 }
 
@@ -101,6 +101,20 @@ model Message {
   @@map("message")
 }
 
+model ExcalidrawGroup {
+  id         String       @id @default(cuid())
+  name       String       @default("未命名分组")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+
+  excalidraws Excalidraw[]
+
+  @@map("excalidraw_group")
+}
+
 model Excalidraw {
   id         String   @id @default(cuid())
   title      String   @default("未命名草图")
@@ -109,9 +123,9 @@ model Excalidraw {
   data       Json     // 存储草图 JSON 数据
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  
+  groupId    String
+  group      ExcalidrawGroup @relation(fields: [groupId], references: [id])
 
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@map("excalidraw") // 可选：数据库中表名为 excalidraw
+  @@map("excalidraw")
 }
