@@ -16,6 +16,7 @@
     "@ai-sdk/react": "^1.2.12",
     "@ariakit/react": "^0.4.17",
     "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@excalidraw/excalidraw": "^0.18.0",
     "@faker-js/faker": "^9.8.0",
     "@hookform/resolvers": "^5.1.1",
@@ -91,6 +92,7 @@
     "css-what": "^7.0.0",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "emoji-mart": "^5.6.0",
     "html2canvas-pro": "^1.5.11",
     "input-otp": "^1.4.2",
     "lodash": "^4.17.21",
@@ -128,7 +130,8 @@
     "use-file-picker": "^2.1.2",
     "use-stick-to-bottom": "^1.1.1",
     "vaul": "^1.1.2",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,23 +1,27 @@
 export interface WhiteboardItem {
   id: string;
-  name: string;
+  title: string;
   emoji: string;
+  version: number;
+  isDeleted: boolean;
+  data: any;
   createdAt: Date;
   updatedAt: Date;
+  groupId: string;
 }
 
 export interface WhiteboardGroup {
   id: string;
   name: string;
-  emoji: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
   whiteboards: WhiteboardItem[];
   isExpanded: boolean;
 }
 
 export interface DeletedItem {
   id: string;
-  name: string;
-  emoji: string;
   type: 'whiteboard' | 'group';
   deletedAt: Date;
   originalData: WhiteboardItem | WhiteboardGroup;

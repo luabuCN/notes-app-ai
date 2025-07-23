@@ -6,147 +6,28 @@ import {
 import { Button } from '@/components/ui/button';
 import { WhiteboardGroup, WhiteboardItem, DeletedItem } from './types';
 import { GroupItem } from './group-item';
+import { useDrawStore } from './store';
 
 export function DrawSidebar() {
-  const [groups, setGroups] = useState<WhiteboardGroup[]>([
-    {
-      id: '1',
-      name: '工作项目',
-      emoji: '💼',
-      isExpanded: true,
-      whiteboards: [
-        { id: '1-1', name: '产品原型设计', emoji: '🎨', createdAt: new Date(), updatedAt: new Date() },
-        { id: '1-2', name: '系统架构图', emoji: '🏗️', createdAt: new Date(), updatedAt: new Date() },
-      ]
-    },
-    {
-      id: '2',
-      name: '个人笔记',
-      emoji: '📝',
-      isExpanded: false,
-      whiteboards: [
-        { id: '2-1', name: '学习计划', emoji: '📚', createdAt: new Date(), updatedAt: new Date() },
-      ]
-    }
-  ]);
-  
-  const [deletedItems, setDeletedItems] = useState<DeletedItem[]>([]);
-  const [editingItem, setEditingItem] = useState<{ type: 'group' | 'whiteboard', id: string, groupId?: string } | null>(null);
-  const [editingName, setEditingName] = useState('');
-  const [editingEmoji, setEditingEmoji] = useState('');
-  // 新建白板 - 移到组内操作
-  const createNewWhiteboard = (groupId: string) => {
-    const newWhiteboard: WhiteboardItem = {
-      id: Date.now().toString(),
-      name: '新白板',
-      emoji: '📄',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    setGroups(prev => prev.map(group => 
-      group.id === groupId
-        ? { ...group, whiteboards: [...group.whiteboards, newWhiteboard] }
-        : group
-    ));
-  };
+  const {
+    groups,
+    deletedItems,
+    editingItem,
+    editingName,
+    editingEmoji,
+    showAddGroupDialog,
+    createNewWhiteboard,
+    createNewGroup,
+    handleCreateGroup,
+    toggleGroupExpansion,
+    startEditing,
+    saveEdit,
+    deleteItem,
+    setEditingName,
+    setEditingEmoji,
+    setShowAddGroupDialog
+  } = useDrawStore();
 
-  const createNewGroup = () => {
-    const newGroup: WhiteboardGroup = {
-      id: Date.now().toString(),
-      name: '新分组',
-      emoji: '📁',
-      isExpanded: true,
-      whiteboards: []
-    };
-    setGroups(prev => [...prev, newGroup]);
-  };
-
-  const toggleGroupExpansion = (groupId: string) => {
-    setGroups(prev => prev.map(group => 
-      group.id === groupId 
-        ? { ...group, isExpanded: !group.isExpanded }
-        : group
-    ));
-  };
-
-  const startEditing = (type: 'group' | 'whiteboard', id: string, groupId?: string) => {
-    const item = type === 'group' 
-      ? groups.find(g => g.id === id)
-      : groups.find(g => g.id === groupId)?.whiteboards.find(w => w.id === id);
-    
-    if (item) {
-      setEditingItem({ type, id, groupId });
-      setEditingName(item.name);
-      setEditingEmoji(item.emoji);
-    }
-  };
-
-  const saveEdit = () => {
-    if (!editingItem) return;
-    
-    if (editingItem.type === 'group') {
-      setGroups(prev => prev.map(group => 
-        group.id === editingItem.id
-          ? { ...group, name: editingName, emoji: editingEmoji }
-          : group
-      ));
-    } else {
-      setGroups(prev => prev.map(group => 
-        group.id === editingItem.groupId
-          ? {
-              ...group,
-              whiteboards: group.whiteboards.map(wb => 
-                wb.id === editingItem.id
-                  ? { ...wb, name: editingName, emoji: editingEmoji, updatedAt: new Date() }
-                  : wb
-              )
-            }
-          : group
-      ));
-    }
-    
-    setEditingItem(null);
-    setEditingName('');
-    setEditingEmoji('');
-  };
-
-  const deleteItem = (type: 'group' | 'whiteboard', id: string, groupId?: string) => {
-    if (type === 'group') {
-      const group = groups.find(g => g.id === id);
-      if (group) {
-        const deletedItem: DeletedItem = {
-          id: group.id,
-          name: group.name,
-          emoji: group.emoji,
-          type: 'group',
-          deletedAt: new Date(),
-          originalData: group
-        };
-        setDeletedItems(prev => [...prev, deletedItem]);
-        setGroups(prev => prev.filter(g => g.id !== id));
-      }
-    } else {
-      const group = groups.find(g => g.id === groupId);
-      const whiteboard = group?.whiteboards.find(w => w.id === id);
-      if (whiteboard) {
-        const deletedItem: DeletedItem = {
-          id: whiteboard.id,
-          name: whiteboard.name,
-          emoji: whiteboard.emoji,
-          type: 'whiteboard',
-          deletedAt: new Date(),
-          originalData: whiteboard
-        };
-        setDeletedItems(prev => [...prev, deletedItem]);
-        setGroups(prev => prev.map(group => 
-          group.id === groupId
-            ? { ...group, whiteboards: group.whiteboards.filter(w => w.id !== id) }
-            : group
-        ));
-      }
-    }
-  };
 
   return (
     <div className="w-full h-full bg-white border-gray-200 flex flex-col">
@@ -193,6 +74,8 @@ export function DrawSidebar() {
           </div>
         {/* )} */}
       </div>
+      
+
     </div>
   );
 }

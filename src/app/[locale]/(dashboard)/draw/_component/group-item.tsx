@@ -75,12 +75,6 @@ export function GroupItem({
           {editingItem?.type === "group" && editingItem.id === group.id ? (
             <div className="flex items-center gap-2 flex-1">
               <Input
-                value={editingEmoji}
-                onChange={(e) => onEditingEmojiChange(e.target.value)}
-                className="w-8 h-6 text-center p-0 border-0 bg-transparent"
-                maxLength={2}
-              />
-              <Input
                 value={editingName}
                 onChange={(e) => onEditingNameChange(e.target.value)}
                 className="flex-1 h-6 px-1 text-sm"
@@ -91,7 +85,6 @@ export function GroupItem({
             </div>
           ) : (
             <>
-              <span className="text-lg">{group.emoji}</span>
               <span className="text-sm font-medium text-gray-700">
                 {group.name}
               </span>

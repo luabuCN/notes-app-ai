@@ -118,6 +118,7 @@ model ExcalidrawGroup {
 model Excalidraw {
   id         String   @id @default(cuid())
   title      String   @default("未命名草图")
+  emoji      String   @default("📄")
   version    Int      @default(1)
   isDeleted  Boolean  @default(false)
   data       Json     // 存储草图 JSON 数据
