@@ -31,9 +31,9 @@ export async function delChat(id: string) {
         id: id,
       },
     });
-    
+
     return { success: true };
-    
+
   } catch (error) {
     throw new Error("删除对话失败");
   }

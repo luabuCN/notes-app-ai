@@ -19,12 +19,13 @@ import { generateDrawing } from "../_action/generateDrawing"
 import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types"
 import { toast } from "sonner"
 
-export function AiDialog({ excalidrawAPI }: {excalidrawAPI: ExcalidrawImperativeAPI }) {
+export function AiDialog({ excalidrawAPI }: { excalidrawAPI: ExcalidrawImperativeAPI }) {
   const [prompt, setPrompt] = useState("")
   const [open, setOpen] = useState(false)
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await generateDrawing(prompt),
     onSuccess: (jsonData) => {
+      console.log(jsonData)
       excalidrawAPI.updateScene({
         elements: jsonData.elements,
         appState: {
@@ -71,7 +72,7 @@ export function AiDialog({ excalidrawAPI }: {excalidrawAPI: ExcalidrawImperative
             描述你想要的图表或草图，AI 将为你在 Excalidraw 中生成相应的内容。
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="prompt" className="text-sm font-medium">
@@ -86,7 +87,7 @@ export function AiDialog({ excalidrawAPI }: {excalidrawAPI: ExcalidrawImperative
               disabled={isPending}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label className="text-sm font-medium text-muted-foreground">
               快速示例
@@ -112,7 +113,7 @@ export function AiDialog({ excalidrawAPI }: {excalidrawAPI: ExcalidrawImperative
               取消
             </Button>
           </DialogClose>
-          <Button 
+          <Button
             onClick={handleGenerate}
             disabled={!prompt.trim() || isPending}
             className="gap-2"

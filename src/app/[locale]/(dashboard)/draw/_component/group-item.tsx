@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   // ChevronDown,
   // ChevronRight,
@@ -19,6 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { WhiteboardGroup } from "./types";
 import { DrawItem } from "./draw-item";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { updateDrawGroup } from "../_action/use-update-draw-group";
+import { deleteDrawGroup } from "../_action/use-delete-draw-group";
+import { create } from 'zustand';
 
 interface GroupItemProps {
   group: WhiteboardGroup;
@@ -26,6 +31,7 @@ interface GroupItemProps {
     type: "group" | "whiteboard";
     id: string;
     groupId?: string;
+    isCreate: boolean;
   } | null;
   editingName: string;
   editingEmoji: string;
@@ -35,6 +41,7 @@ interface GroupItemProps {
     id: string,
     groupId?: string
   ) => void;
+  onCancelEditing: () => void;
   onSaveEdit: () => void;
   onDeleteItem: (
     type: "group" | "whiteboard",
@@ -53,18 +60,65 @@ export function GroupItem({
   editingEmoji,
   onToggleExpansion,
   onStartEditing,
+  onCancelEditing,
   onSaveEdit,
   onDeleteItem,
   onEditingNameChange,
   onEditingEmojiChange,
   onCreateWhiteboard
 }: GroupItemProps) {
+  const groupInputRef = useRef<HTMLInputElement>(null);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const queryClient = useQueryClient();
+  const saveDrawGroup = useMutation({
+    mutationFn: () => updateDrawGroup({
+      name: editingName,
+      id: group.id,
+    }),
+    onSuccess: () => {
+      toast.success('编辑成功');
+      onSaveEdit()
+      queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
+    },
+    onError: () => {
+      toast.error('编辑失败，请稍后重试');
+    },
+  });
+
+  const deleteDrawGroupItem = useMutation({
+    mutationFn: () => deleteDrawGroup(group.id),
+    onSuccess: () => {
+      toast.success('删除成功');
+      queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
+    },
+    onError: () => {
+      toast.error('删除失败，请稍后重试');
+    },
+  });
+
+  const handleSaveEdit = () => {
+    if (!editingName.trim()) {
+      onSaveEdit()
+    } else {
+      setIsDisabled(true);
+      saveDrawGroup.mutate();
+    }
+  }
+
+  useEffect(() => {
+    if (editingItem?.type === "group" && editingItem.id === group.id) {
+      setIsDisabled(false);
+      groupInputRef.current?.focus();
+    }
+  }, [editingItem, group.id]);
+
   return (
     <div className="space-y-1">
       {/* 分组头部 */}
       <div className="flex items-center justify-between  hover:bg-gray-50 rounded-lg group">
         <div
-          className="flex items-center gap-2 flex-1 cursor-pointer"
+          className="flex items-center gap-2 flex-1 cursor-pointer py-1"
           onClick={() => onToggleExpansion(group.id)}
         >
           {group.isExpanded ? (
@@ -75,11 +129,13 @@ export function GroupItem({
           {editingItem?.type === "group" && editingItem.id === group.id ? (
             <div className="flex items-center gap-2 flex-1">
               <Input
-                value={editingName}
+                ref={groupInputRef}
+                defaultValue={group.name}
                 onChange={(e) => onEditingNameChange(e.target.value)}
                 className="flex-1 h-6 px-1 text-sm"
-                onBlur={onSaveEdit}
-                onKeyDown={(e) => e.key === "Enter" && onSaveEdit()}
+                disabled={isDisabled}
+                onBlur={handleSaveEdit}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
                 autoFocus
               />
             </div>
@@ -115,7 +171,7 @@ export function GroupItem({
               编辑
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onDeleteItem("group", group.id)}
+              onClick={() => deleteDrawGroupItem.mutate()}
               className="text-red-600"
             >
               <Trash2 className="h-3 w-3 mr-2" />
@@ -137,6 +193,7 @@ export function GroupItem({
               editingName={editingName}
               editingEmoji={editingEmoji}
               onStartEditing={onStartEditing}
+              onCancelEditing={onCancelEditing}
               onSaveEdit={onSaveEdit}
               onDeleteItem={onDeleteItem}
               onEditingNameChange={onEditingNameChange}

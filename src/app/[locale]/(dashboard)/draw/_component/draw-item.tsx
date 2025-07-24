@@ -22,16 +22,23 @@ import { Input } from '@/components/ui/input';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { WhiteboardItem } from './types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { group } from 'console';
+import { toast } from 'sonner';
+import { deleteDrawGroup } from '../_action/use-delete-draw-group';
+import { createDraw } from '../_action/use-create-draw';
+import { updateDraw } from '../_action/use-update-draw';
+import { deleteDraw } from '../_action/use-delete-draw';
 
 interface WhiteboardItemProps {
   whiteboard: WhiteboardItem;
   groupId: string;
-  editingItem: { type: 'group' | 'whiteboard', id: string, groupId?: string } | null;
+  editingItem: { type: 'group' | 'whiteboard', id: string, groupId?: string, isCreate: boolean } | null;
   editingName: string;
   editingEmoji: string;
   onStartEditing: (type: 'group' | 'whiteboard', id: string, groupId?: string) => void;
   onSaveEdit: () => void;
-  onCancelEdit: () => void;
+  onCancelEditing: () => void;
   onDeleteItem: (type: 'group' | 'whiteboard', id: string, groupId?: string) => void;
   onEditingNameChange: (name: string) => void;
   onEditingEmojiChange: (emoji: string) => void;
@@ -44,22 +51,69 @@ export function DrawItem({
   editingName,
   editingEmoji,
   onStartEditing,
+  onCancelEditing,
   onSaveEdit,
-  onCancelEdit,
   onDeleteItem,
   onEditingNameChange,
   onEditingEmojiChange,
 }: WhiteboardItemProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  const createNewDraw = useMutation({
+    mutationFn: () => createDraw({ title: editingName, groupId, data: {}, emoji: editingEmoji }),
+    onSuccess: () => {
+      toast.success('创建成功');
+      queryClient.invalidateQueries({ queryKey: ['drawGroups'] });
+    },
+    onError: () => {
+      toast.error('创建失败，请稍后重试');
+    },
+  });
+
+  const updateDrawBaseData = useMutation({
+    mutationFn: () => updateDraw({
+      title: editingName,
+      emoji: editingEmoji,
+      id: whiteboard.id,
+    }),
+    onSuccess: () => {
+      toast.success('编辑成功');
+      onSaveEdit()
+      queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
+    },
+    onError: () => {
+      toast.error('编辑失败，请稍后重试');
+    },
+  });
+
+  const deleteDrawItem = useMutation({
+    mutationFn: () => deleteDraw(whiteboard.id),
+    onSuccess: () => {
+      toast.success('删除成功');
+      queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
+    },
+    onError: () => {
+      toast.error('删除失败，请稍后重试');
+    },
+  });
+
   const handleEmojiSelect = (emoji: any) => {
     onEditingEmojiChange(emoji.native);
     setShowEmojiPicker(false);
   };
+
+  const handleSaveEdit = () => {
+    if (!editingName.trim()) return onSaveEdit();
+    if (editingItem?.isCreate) return createNewDraw.mutate();
+    updateDrawBaseData.mutate();
+  }
+
   return (
-    <div className="flex items-center justify-between hover:bg-gray-50 rounded-lg group"> 
+    <div className="flex items-center justify-between hover:bg-gray-50 rounded-lg group">
       {editingItem?.type === 'whiteboard' && editingItem.id === whiteboard.id ? (
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2 flex-1 py-1">
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
             <PopoverTrigger asChild>
               <Button
@@ -81,12 +135,12 @@ export function DrawItem({
             </PopoverContent>
           </Popover>
           <Input
-            value={editingName}
+            defaultValue={whiteboard.title}
             onChange={(e) => onEditingNameChange(e.target.value)}
             className="flex-1 h-6 px-1 text-sm"
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSaveEdit();
-              if (e.key === 'Escape') onCancelEdit();
+              if (e.key === 'Escape') onCancelEditing();
             }}
             autoFocus
           />
@@ -95,7 +149,7 @@ export function DrawItem({
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
-              onClick={onSaveEdit}
+              onClick={handleSaveEdit}
             >
               <Check className="h-3 w-3" />
             </Button>
@@ -103,7 +157,7 @@ export function DrawItem({
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
-              onClick={onCancelEdit}
+              onClick={onCancelEditing}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -120,7 +174,7 @@ export function DrawItem({
           </div>
         </div>
       )}
-      
+
       {!(editingItem?.type === 'whiteboard' && editingItem.id === whiteboard.id) && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -137,8 +191,8 @@ export function DrawItem({
               <Edit3 className="h-3 w-3 mr-2" />
               编辑
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => onDeleteItem('whiteboard', whiteboard.id, groupId)}
+            <DropdownMenuItem
+              onClick={() => deleteDrawItem.mutate()}
               className="text-red-600"
             >
               <Trash2 className="h-3 w-3 mr-2" />
