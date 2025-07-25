@@ -3,8 +3,9 @@ export interface WhiteboardItem {
   title: string;
   emoji: string;
   version: number;
-  isDeleted: boolean;
-  data: any;
+  isDeleted?: boolean;
+  data?: any;
+  userId?: string;
   createdAt: Date;
   updatedAt: Date;
   groupId: string;

@@ -39,7 +39,7 @@ const LANG_MAP = {
   },
 } as const;
 
-export  function LocaleModelToggle() {
+export function LocaleModelToggle() {
   const currentLocale = useLocale();
   const router = useRouter();
   const pathname = usePathname();

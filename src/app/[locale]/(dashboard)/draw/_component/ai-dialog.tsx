@@ -25,11 +25,19 @@ export function AiDialog({ excalidrawAPI }: { excalidrawAPI: ExcalidrawImperativ
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await generateDrawing(prompt),
     onSuccess: (jsonData) => {
-      console.log(jsonData)
+      console.log(jsonData);
+
+      let drawData = jsonData
+      if (drawData.appState?.collaborators &&
+        !(drawData.appState.collaborators instanceof Map)) {
+        drawData.appState.collaborators = new Map(
+          Object.entries((drawData as any).appState.collaborators)
+        );
+      }
       excalidrawAPI.updateScene({
-        elements: jsonData.elements,
+        elements: drawData.elements,
         appState: {
-          ...jsonData.appState,
+          ...drawData.appState,
           isLoading: false,
         },
       });

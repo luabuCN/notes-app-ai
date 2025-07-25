@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 export function CustomProviders({
   children,
   locale,

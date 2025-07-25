@@ -8,7 +8,7 @@ export default function DrawPage() {
   const { setShowAddGroupDialog } = useDrawStore();
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50">
+    <div className="flex flex-col items-center justify-center h-full w-full bg-card">
       <div className="text-center space-y-6 max-w-md">
         <div className="space-y-4">
           <Folder className="h-16 w-16 text-gray-300 mx-auto" />
@@ -19,10 +19,10 @@ export default function DrawPage() {
             </p>
           </div>
         </div>
-        
+
         <div className="space-y-3">
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             size="lg"
             onClick={() => setShowAddGroupDialog(true)}
           >

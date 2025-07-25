@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { WhiteboardGroup, WhiteboardItem, DeletedItem } from './types';
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { createDrawGroup } from '../_action/use-create-draw-group'
 
+type CurrentDraw=Required<Omit<WhiteboardItem, 'createdAt' | 'userId' | 'isDeleted'>> | null;
 interface DrawStore {
+  // 当前选择
+  currentDraw:CurrentDraw;
+
   // 弹窗状态
   showAddGroupDialog: boolean;
   setShowAddGroupDialog: (show: boolean) => void;
@@ -27,9 +28,10 @@ interface DrawStore {
   setEditingEmoji: (emoji: string) => void;
 
   // 其他操作函数
+  setCurrentDraw: (draw:CurrentDraw)=>void
   createNewWhiteboard: (groupId: string) => void;
   createNewGroup: () => void;
-  toggleGroupExpansion: (groupId: string) => void;
+  toggleGroupExpansion: (groupId: string,isExpanded:boolean) => void;
   startEditing: (type: 'group' | 'whiteboard', id: string, groupId?: string, isCreate?: boolean) => void;
   cancelEditing: () => void;
   saveEdit: () => void;
@@ -37,6 +39,8 @@ interface DrawStore {
 }
 
 export const useDrawStore = create<DrawStore>((set, get) => ({
+  currentDraw:null,
+
   // 弹窗状态
   showAddGroupDialog: false,
   setShowAddGroupDialog: (show) => set({ showAddGroupDialog: show }),
@@ -98,11 +102,11 @@ export const useDrawStore = create<DrawStore>((set, get) => ({
   },
 
   // 切换组展开状态
-  toggleGroupExpansion: (groupId) => {
+  toggleGroupExpansion: (groupId,isExpanded) => {
     set((state) => ({
       groups: state.groups.map(group =>
         group.id === groupId
-          ? { ...group, isExpanded: !group.isExpanded }
+          ? { ...group, isExpanded: isExpanded }
           : group
       )
     }));
@@ -162,22 +166,21 @@ export const useDrawStore = create<DrawStore>((set, get) => ({
 
   // 保存编辑
   saveEdit: () => {
-    const { editingItem, editingName, editingEmoji } = get();
+    const { editingItem } = get();
     if (!editingItem) return;
+    set((state) => ({
+      editingItem: null,
+      editingName: '',
+      editingEmoji: ''
+    }));
+  },
 
-    if (editingItem.type === 'group') {
-      set((state) => ({
-        editingItem: null,
-        editingName: '',
-        editingEmoji: ''
-      }));
-    } else {
-      set((state) => ({
-        editingItem: null,
-        editingName: '',
-        editingEmoji: ''
-      }));
-    }
+  setCurrentDraw: (draw: CurrentDraw) => {
+    console.log(draw);
+    
+    set((state) => ({
+        currentDraw:draw?{...draw}:state.currentDraw, 
+    }));
   },
 
   // 删除项目

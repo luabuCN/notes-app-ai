@@ -24,6 +24,15 @@ export async function getAllDrawGroups() {
                 },
                 where: {
                     isDeleted: false,
+                },
+                select: {
+                    title: true,
+                    id: true,
+                    emoji: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    groupId: true,
+                    version: true,
                 }
             },
         },

@@ -23,50 +23,24 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { updateDrawGroup } from "../_action/use-update-draw-group";
 import { deleteDrawGroup } from "../_action/use-delete-draw-group";
-import { create } from 'zustand';
+import { useDrawStore } from './store';
 
 interface GroupItemProps {
   group: WhiteboardGroup;
-  editingItem: {
-    type: "group" | "whiteboard";
-    id: string;
-    groupId?: string;
-    isCreate: boolean;
-  } | null;
-  editingName: string;
-  editingEmoji: string;
-  onToggleExpansion: (groupId: string) => void;
-  onStartEditing: (
-    type: "group" | "whiteboard",
-    id: string,
-    groupId?: string
-  ) => void;
-  onCancelEditing: () => void;
-  onSaveEdit: () => void;
-  onDeleteItem: (
-    type: "group" | "whiteboard",
-    id: string,
-    groupId?: string
-  ) => void;
-  onEditingNameChange: (name: string) => void;
-  onEditingEmojiChange: (emoji: string) => void;
-  onCreateWhiteboard: (groupId: string) => void;
 }
 
 export function GroupItem({
   group,
-  editingItem,
-  editingName,
-  editingEmoji,
-  onToggleExpansion,
-  onStartEditing,
-  onCancelEditing,
-  onSaveEdit,
-  onDeleteItem,
-  onEditingNameChange,
-  onEditingEmojiChange,
-  onCreateWhiteboard
 }: GroupItemProps) {
+  const {
+    editingItem,
+    editingName,
+    toggleGroupExpansion,
+    startEditing,
+    saveEdit,
+    setEditingName,
+    createNewWhiteboard
+  } = useDrawStore();
   const groupInputRef = useRef<HTMLInputElement>(null);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -78,7 +52,7 @@ export function GroupItem({
     }),
     onSuccess: () => {
       toast.success('编辑成功');
-      onSaveEdit()
+      saveEdit()
       queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
     },
     onError: () => {
@@ -98,8 +72,8 @@ export function GroupItem({
   });
 
   const handleSaveEdit = () => {
-    if (!editingName.trim()) {
-      onSaveEdit()
+    if (!editingName.trim() || editingName === group.name) {
+      saveEdit()
     } else {
       setIsDisabled(true);
       saveDrawGroup.mutate();
@@ -116,10 +90,10 @@ export function GroupItem({
   return (
     <div className="space-y-1">
       {/* 分组头部 */}
-      <div className="flex items-center justify-between  hover:bg-gray-50 rounded-lg group">
+      <div className="flex items-center justify-between p-1 hover:bg-secondary rounded-lg group">
         <div
-          className="flex items-center gap-2 flex-1 cursor-pointer py-1"
-          onClick={() => onToggleExpansion(group.id)}
+          className="flex items-center gap-2 flex-1 cursor-pointer"
+          onClick={() => toggleGroupExpansion(group.id, group.isExpanded)}
         >
           {group.isExpanded ? (
             <FolderOpen className="h-4 w-4 text-gray-500" /> // 修改图标
@@ -131,7 +105,7 @@ export function GroupItem({
               <Input
                 ref={groupInputRef}
                 defaultValue={group.name}
-                onChange={(e) => onEditingNameChange(e.target.value)}
+                onChange={(e) => setEditingName(e.target.value)}
                 className="flex-1 h-6 px-1 text-sm"
                 disabled={isDisabled}
                 onBlur={handleSaveEdit}
@@ -162,11 +136,11 @@ export function GroupItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onCreateWhiteboard(group.id)}>
+            <DropdownMenuItem onClick={() => createNewWhiteboard(group.id)}>
               <Plus className="h-3 w-3 mr-2" />
               新建白板
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onStartEditing("group", group.id)}>
+            <DropdownMenuItem onClick={() => startEditing("group", group.id)}>
               <Edit3 className="h-3 w-3 mr-2" />
               编辑
             </DropdownMenuItem>
@@ -183,21 +157,12 @@ export function GroupItem({
 
       {/* 白板列表 */}
       {group.isExpanded && (
-        <div className="ml-6 space-y-1">
+        <div className="ml-4 space-y-1">
           {group.whiteboards.map((whiteboard) => (
             <DrawItem
               key={whiteboard.id}
               whiteboard={whiteboard}
               groupId={group.id}
-              editingItem={editingItem}
-              editingName={editingName}
-              editingEmoji={editingEmoji}
-              onStartEditing={onStartEditing}
-              onCancelEditing={onCancelEditing}
-              onSaveEdit={onSaveEdit}
-              onDeleteItem={onDeleteItem}
-              onEditingNameChange={onEditingNameChange}
-              onEditingEmojiChange={onEditingEmojiChange}
             />
           ))}
         </div>

@@ -23,40 +23,36 @@ import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { WhiteboardItem } from './types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { group } from 'console';
 import { toast } from 'sonner';
-import { deleteDrawGroup } from '../_action/use-delete-draw-group';
 import { createDraw } from '../_action/use-create-draw';
 import { updateDraw } from '../_action/use-update-draw';
 import { deleteDraw } from '../_action/use-delete-draw';
+import { useDrawStore } from './store';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { useLocale } from "next-intl";
 
 interface WhiteboardItemProps {
   whiteboard: WhiteboardItem;
   groupId: string;
-  editingItem: { type: 'group' | 'whiteboard', id: string, groupId?: string, isCreate: boolean } | null;
-  editingName: string;
-  editingEmoji: string;
-  onStartEditing: (type: 'group' | 'whiteboard', id: string, groupId?: string) => void;
-  onSaveEdit: () => void;
-  onCancelEditing: () => void;
-  onDeleteItem: (type: 'group' | 'whiteboard', id: string, groupId?: string) => void;
-  onEditingNameChange: (name: string) => void;
-  onEditingEmojiChange: (emoji: string) => void;
 }
 
 export function DrawItem({
   whiteboard,
   groupId,
-  editingItem,
-  editingName,
-  editingEmoji,
-  onStartEditing,
-  onCancelEditing,
-  onSaveEdit,
-  onDeleteItem,
-  onEditingNameChange,
-  onEditingEmojiChange,
 }: WhiteboardItemProps) {
+  const locale = useLocale();
+  const {
+    currentDraw,
+    editingItem,
+    editingName,
+    editingEmoji,
+    startEditing,
+    cancelEditing,
+    saveEdit,
+    setEditingName,
+    setEditingEmoji,
+  } = useDrawStore();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const queryClient = useQueryClient();
@@ -80,7 +76,7 @@ export function DrawItem({
     }),
     onSuccess: () => {
       toast.success('编辑成功');
-      onSaveEdit()
+      saveEdit()
       queryClient.invalidateQueries({ queryKey: ['drawGroups'] }); // 触发重新获取
     },
     onError: () => {
@@ -100,20 +96,29 @@ export function DrawItem({
   });
 
   const handleEmojiSelect = (emoji: any) => {
-    onEditingEmojiChange(emoji.native);
+    setEditingEmoji(emoji.native);
     setShowEmojiPicker(false);
   };
 
   const handleSaveEdit = () => {
-    if (!editingName.trim()) return onSaveEdit();
+    if (!editingName.trim() || editingName === whiteboard.title) return saveEdit();
     if (editingItem?.isCreate) return createNewDraw.mutate();
     updateDrawBaseData.mutate();
   }
 
+  const handleSelectDraw = (e: any) => {
+    if (currentDraw?.id === whiteboard.id) return e.preventDefault();
+  }
+
   return (
-    <div className="flex items-center justify-between hover:bg-gray-50 rounded-lg group">
+    <div className={
+      cn("flex items-center justify-between p-1 hover:bg-secondary rounded-lg group",
+        currentDraw?.id === whiteboard.id && 'bg-secondary text-secondary-foreground'
+      )
+    }
+    >
       {editingItem?.type === 'whiteboard' && editingItem.id === whiteboard.id ? (
-        <div className="flex items-center gap-2 flex-1 py-1">
+        <div className="flex items-center gap-2 flex-1">
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
             <PopoverTrigger asChild>
               <Button
@@ -136,11 +141,11 @@ export function DrawItem({
           </Popover>
           <Input
             defaultValue={whiteboard.title}
-            onChange={(e) => onEditingNameChange(e.target.value)}
+            onChange={(e) => setEditingName(e.target.value)}
             className="flex-1 h-6 px-1 text-sm"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSaveEdit();
-              if (e.key === 'Escape') onCancelEditing();
+              if (e.key === 'Enter') saveEdit();
+              if (e.key === 'Escape') cancelEditing();
             }}
             autoFocus
           />
@@ -157,14 +162,15 @@ export function DrawItem({
               variant="ghost"
               size="sm"
               className="h-6 w-6 p-0 text-red-600 hover:bg-red-50"
-              onClick={onCancelEditing}
+              onClick={cancelEditing}
             >
               <X className="h-3 w-3" />
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-2 flex-1 cursor-pointer">
+        <Link href={`/${locale}/draw/${whiteboard.id}`} onNavigate={handleSelectDraw}
+          className="flex items-center gap-2 flex-1 cursor-pointer">
           <span className="text-lg">{whiteboard.emoji}</span>
           <div>
             <p className="text-sm font-medium text-gray-700">{whiteboard.title}</p>
@@ -172,7 +178,7 @@ export function DrawItem({
               {whiteboard.updatedAt.toLocaleDateString()}
             </p>
           </div>
-        </div>
+        </Link>
       )}
 
       {!(editingItem?.type === 'whiteboard' && editingItem.id === whiteboard.id) && (
@@ -187,7 +193,7 @@ export function DrawItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onStartEditing('whiteboard', whiteboard.id, groupId)}>
+            <DropdownMenuItem onClick={() => startEditing('whiteboard', whiteboard.id, groupId)}>
               <Edit3 className="h-3 w-3 mr-2" />
               编辑
             </DropdownMenuItem>

@@ -1,7 +1,8 @@
 import { ExcalidrawComponent } from "../_component/excalidraw";
 
-export default function Draw({ params }: { params: { drawid: string } }) {
+export default async function Draw({ params }: { params: Promise<{ drawId: string }> }) {
+  const { drawId } = await params
   return (
-    <ExcalidrawComponent/>
+    <ExcalidrawComponent drawId={drawId} />
   );
 }

@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Folder,
   Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { WhiteboardGroup, WhiteboardItem, DeletedItem } from './types';
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { GroupItem } from './group-item';
 import { useDrawStore } from './store';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,22 +13,10 @@ import { getAllDrawGroups } from '../_action/get-all-draw-groups';
 export function DrawSidebar() {
   const {
     groups,
-    deletedItems,
-    editingItem,
-    editingName,
-    editingEmoji,
-    showAddGroupDialog,
-    createNewWhiteboard,
+    currentDraw,
     createNewGroup,
-    toggleGroupExpansion,
-    startEditing,
-    cancelEditing,
-    saveEdit,
-    deleteItem,
-    setEditingName,
-    setEditingEmoji,
-    setShowAddGroupDialog,
     setGroups,
+    toggleGroupExpansion
   } = useDrawStore();
 
   const { data: groupsData, isLoading } = useQuery({
@@ -40,11 +27,19 @@ export function DrawSidebar() {
   useEffect(() => {
     if (!groupsData) return;
     setGroups(groupsData);
+    if (currentDraw?.groupId) {
+      toggleGroupExpansion(currentDraw?.groupId, true);
+    }
   }, [groupsData]);
 
+  useEffect(() => {
+    if (groups && currentDraw?.groupId) {
+      toggleGroupExpansion(currentDraw?.groupId, true);
+    }
+  }, [currentDraw?.id])
 
   return (
-    <div className="w-full h-full min-w-[200px] overflow-hidden bg-white border-gray-200 flex flex-col">
+    <div className="w-full h-full min-w-[200px] overflow-hidden flex flex-col">
       <div className="border-gray-200 mb-4">
         <Button
           onClick={createNewGroup}
@@ -65,17 +60,6 @@ export function DrawSidebar() {
             <GroupItem
               key={group.id}
               group={group}
-              editingItem={editingItem}
-              editingName={editingName}
-              editingEmoji={editingEmoji}
-              onToggleExpansion={toggleGroupExpansion}
-              onStartEditing={startEditing}
-              onCancelEditing={cancelEditing}
-              onSaveEdit={saveEdit}
-              onDeleteItem={deleteItem}
-              onEditingNameChange={setEditingName}
-              onEditingEmojiChange={setEditingEmoji}
-              onCreateWhiteboard={createNewWhiteboard}
             />
           ))}
           {isLoading && (
