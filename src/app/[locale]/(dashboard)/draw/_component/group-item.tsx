@@ -93,7 +93,7 @@ export function GroupItem({
       <div className="flex items-center justify-between p-1 hover:bg-secondary rounded-lg group">
         <div
           className="flex items-center gap-2 flex-1 cursor-pointer"
-          onClick={() => toggleGroupExpansion(group.id, group.isExpanded)}
+          onClick={() => toggleGroupExpansion(group.id, !group.isExpanded)}
         >
           {group.isExpanded ? (
             <FolderOpen className="h-4 w-4 text-gray-500" /> // 修改图标

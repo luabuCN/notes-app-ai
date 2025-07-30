@@ -25,8 +25,6 @@ export function AiDialog({ excalidrawAPI }: { excalidrawAPI: ExcalidrawImperativ
   const { mutate, isPending } = useMutation({
     mutationFn: async () => await generateDrawing(prompt),
     onSuccess: (jsonData) => {
-      console.log(jsonData);
-
       let drawData = jsonData
       if (drawData.appState?.collaborators &&
         !(drawData.appState.collaborators instanceof Map)) {
@@ -36,10 +34,9 @@ export function AiDialog({ excalidrawAPI }: { excalidrawAPI: ExcalidrawImperativ
       }
       excalidrawAPI.updateScene({
         elements: drawData.elements,
-        appState: {
-          ...drawData.appState,
-          isLoading: false,
-        },
+        // appState: {
+        //   isLoading: false,
+        // },
       });
       setPrompt("");
       toast.success("生成成功");

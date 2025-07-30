@@ -13,11 +13,6 @@ interface DrawStore {
   // 组数据
   groups: WhiteboardGroup[];
   setGroups: (groups: WhiteboardGroup[]) => void;
-  addGroup: (group: WhiteboardGroup) => void;
-
-  // 删除的项目
-  deletedItems: DeletedItem[];
-  setDeletedItems: (items: DeletedItem[]) => void;
 
   // 编辑状态
   editingItem: { type: 'group' | 'whiteboard', id: string, groupId?: string, isCreate: boolean } | null;
@@ -35,7 +30,6 @@ interface DrawStore {
   startEditing: (type: 'group' | 'whiteboard', id: string, groupId?: string, isCreate?: boolean) => void;
   cancelEditing: () => void;
   saveEdit: () => void;
-  deleteItem: (type: 'group' | 'whiteboard', id: string, groupId?: string) => void;
 }
 
 export const useDrawStore = create<DrawStore>((set, get) => ({
@@ -56,12 +50,6 @@ export const useDrawStore = create<DrawStore>((set, get) => ({
       };
     }),
   })),
-
-  addGroup: (group) => set((state) => ({ groups: [...state.groups, group] })),
-
-  // 删除的项目
-  deletedItems: [],
-  setDeletedItems: (items) => set({ deletedItems: items }),
 
   // 编辑状态
   editingItem: null,
@@ -152,7 +140,6 @@ export const useDrawStore = create<DrawStore>((set, get) => ({
             }
             : group
         );
-        console.log(updatedGroups);
         set({ groups: updatedGroups });
       }
     }
@@ -176,52 +163,8 @@ export const useDrawStore = create<DrawStore>((set, get) => ({
   },
 
   setCurrentDraw: (draw: CurrentDraw) => {
-    console.log(draw);
-    
     set((state) => ({
         currentDraw:draw?{...draw}:state.currentDraw, 
     }));
-  },
-
-  // 删除项目
-  deleteItem: (type, id, groupId) => {
-    const { groups, deletedItems } = get();
-
-    if (type === 'group') {
-      const group = groups.find(g => g.id === id);
-      if (group) {
-        const deletedItem: DeletedItem = {
-          id: group.id,
-          type: 'group',
-          deletedAt: new Date(),
-          originalData: group
-        };
-
-        set((state) => ({
-          deletedItems: [...state.deletedItems, deletedItem],
-          groups: state.groups.filter(g => g.id !== id)
-        }));
-      }
-    } else {
-      const group = groups.find(g => g.id === groupId);
-      const whiteboard = group?.whiteboards.find(w => w.id === id);
-      if (whiteboard) {
-        const deletedItem: DeletedItem = {
-          id: whiteboard.id,
-          type: 'whiteboard',
-          deletedAt: new Date(),
-          originalData: whiteboard
-        };
-
-        set((state) => ({
-          deletedItems: [...state.deletedItems, deletedItem],
-          groups: state.groups.map(group =>
-            group.id === groupId
-              ? { ...group, whiteboards: group.whiteboards.filter(w => w.id !== id) }
-              : group
-          )
-        }));
-      }
-    }
   },
 }));
