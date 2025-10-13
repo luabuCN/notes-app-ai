@@ -11,7 +11,7 @@ import { ArrowUp, Loader2, Square } from "lucide-react";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { ChatRequestOptions } from "ai";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { createChat } from "../_action/use-create-chat";
 import { useChatSession } from "@/lib/provider/chat-session-provider"
 import { toast } from "sonner";
+
 type ChatInputProps = {
   input: string;
   setInput: Dispatch<SetStateAction<string>>;
@@ -41,7 +42,6 @@ export function ChatInput({
   isLoading
 }: ChatInputProps) {
   const t = useTranslations("ai");
-
   const { data, isPending } = useSession();
   const user = data?.user;
   const { chatId } = useChatSession()
@@ -54,8 +54,9 @@ export function ChatInput({
       userId: user!.id,
     }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-      router.push(`/ai/c/${data.id}?firstMessage=${encodeURIComponent(input)}`);
+      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      // 使用 replace 而不是 push，避免历史记录堆积
+      router.replace(`/ai/c/${data.id}?firstMessage=${encodeURIComponent(input)}`);
     },
     onError: (error) => {
       console.error('Failed to create chat:', error);
@@ -66,9 +67,11 @@ export function ChatInput({
   const handleSubmit = () => {
     if (!input.trim()) return;
     if (!chatId) {
+      // 没有 chatId，需要先创建对话
       createConversationMutation.mutate();
       return;
     }
+    // 已有 chatId，直接发送消息
     append({ content: input, role: "user" });
     setInput("");
   };
@@ -116,6 +119,7 @@ export function ChatInput({
               size="icon"
               className="h-8 w-8 rounded-full cursor-pointer"
               onClick={handleSubmit}
+              disabled={createConversationMutation.isPending}
             >
               {(status === "submitted" || status === "streaming") ? (
                 <Square className="size-3 fill-current" />
@@ -131,17 +135,14 @@ export function ChatInput({
           <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
             Tell me a joke
           </PromptSuggestion>
-
           <PromptSuggestion onClick={() => setInput("How does this work?")}>
             How does this work?
           </PromptSuggestion>
-
           <PromptSuggestion
             onClick={() => setInput("Generate an image of a cat")}
           >
             Generate an image of a cat
           </PromptSuggestion>
-
           <PromptSuggestion onClick={() => setInput("Write a poem")}>
             Write a poem
           </PromptSuggestion>

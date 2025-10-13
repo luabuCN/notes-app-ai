@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { useSearchParams } from "next/navigation";
 import { saveMessages } from "../_action/use-save-message";
-import { useLocale } from "next-intl";
+// import { useLocale } from "next-intl";
 
 export function ChatContainer() {
   const { messages: initMessage, isLoading } = useMessages();
@@ -19,40 +19,57 @@ export function ChatContainer() {
   const searchParams = useSearchParams();
   const firstMessage = searchParams?.get('firstMessage');
   const queryClient = useQueryClient();
-  const locale = useLocale();
+  // const locale = useLocale();
   const lastSavedMessageCountRef = useRef(0);
+  const hasProcessedFirstMessage = useRef(false);
+  
   const { messages, input, status, reload, setMessages, setInput, append } =
     useChat({
       api: "/api/ai/chat",
       initialMessages: initMessage,
+      // 添加 body 配置，确保 chatId 被传递
+      body: chatId ? { chatId } : undefined,
     });
 
-  //保存对话消息
+  // 保存对话消息
   const saveMessageMutation = useMutation({
     mutationFn: ({ conversationId, messages }: { conversationId: string, messages: any[] }) =>
       saveMessages(conversationId, messages),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId], exact: true });
-
     },
-    onError: (error) => {
-      toast.error('保存消息失败');
+    onError: (error:any) => {
+      toast.error(error);
     }
   })
 
+  // 初始化消息
   useEffect(() => {
     if (initMessage.length > 0 && messages.length === 0) {
       setMessages(initMessage);
+      lastSavedMessageCountRef.current = initMessage.length;
     }
   }, [initMessage, messages.length, setMessages]);
 
   // 处理首次消息发送
   useEffect(() => {
-    if (!isLoading && firstMessage && messages.length === 0 && chatId) {
+    if (!isLoading && 
+        firstMessage && 
+        chatId && 
+        !hasProcessedFirstMessage.current) {
+      hasProcessedFirstMessage.current = true;
       append({ content: firstMessage, role: "user" });
-      window.history.replaceState({}, '', `/${locale}/ai/c/${chatId}`);
+      // 清理 URL 中的 firstMessage 参数
+      const url = new URL(window.location.href);
+      url.searchParams.delete('firstMessage');
+      window.history.replaceState({}, '', url.toString());
     }
-  }, [isLoading, firstMessage, messages.length, chatId, append])
+  }, [isLoading, firstMessage, chatId, append])
+
+  // 重置 firstMessage 标记当 chatId 改变
+  useEffect(() => {
+    hasProcessedFirstMessage.current = false;
+  }, [chatId]);
 
   const handleDelete = useCallback(
     (id: string) => {
@@ -71,6 +88,7 @@ export function ChatContainer() {
     },
     [messages, setMessages]
   );
+
   const conversationProps = useMemo(
     () => ({
       messages,
@@ -82,11 +100,11 @@ export function ChatContainer() {
     [messages, status, handleDelete, handleEdit, reload]
   );
 
+  // 自动保存消息
   useEffect(() => {
     if (status === "ready" && chatId && messages.length > 0 &&
       messages.length !== lastSavedMessageCountRef.current) {
 
-      // 确保最后一条消息不是正在生成中的消息
       const lastMessage = messages[messages.length - 1];
       if (lastMessage && lastMessage.content && lastMessage.content.trim() !== '') {
         saveMessageMutation.mutate({
@@ -100,7 +118,7 @@ export function ChatContainer() {
     if (status === "error") {
       toast.warning("出现错误，请稍后重试", { style: { color: "red" } });
     }
-  }, [status, messages, chatId]);
+  }, [status, messages, chatId,saveMessageMutation]);
 
   const chatInputProps = useMemo(
     () => ({
@@ -113,6 +131,7 @@ export function ChatContainer() {
     }),
     [input, setInput, append, status, messages, isLoading]
   );
+
   return (
     <div className="flex flex-col h-full w-full items-center justify-center relative">
       <Conversation {...conversationProps} />
