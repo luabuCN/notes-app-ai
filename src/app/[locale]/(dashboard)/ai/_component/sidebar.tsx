@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { updateChat } from "../_action/update-chats";
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -31,7 +31,7 @@ export function Sidebar() {
   return (
     <div className="w-full h-full min-w-[150px] overflow-hidden flex flex-col gap-20px space-y-5">
       <div
-        className="w-full h-[30px] px-2 flex items-center space-x-2 cursor-pointer hover:bg-gray-100 rounded-sm"
+        className="w-full h-[30px] px-2 flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-sm text-gray-900 dark:text-gray-100"
         onClick={() => router.push("/ai")}
       >
         <SquarePen size={16} className="mr-2" /> 新对话
@@ -149,16 +149,16 @@ function ChatItem({
   return (
     <div
       className={cn(
-        "w-full h-[30px] px-2 flex items-center justify-between  space-x-2 cursor-pointer hover:bg-gray-100 rounded-sm group",
+        "w-full h-[30px] px-2 flex items-center justify-between  space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-sm group text-gray-900 dark:text-gray-100",
         {
-          "bg-gray-100": chatId === chat.id,
+          "bg-gray-100 dark:bg-gray-800": chatId === chat.id,
         }
       )}
       onClick={onClick}
     >
       {editingId === chat.id ? (
         <Input
-          className="text-sm max-w-[150px] h-[25px] truncate border rounded px-1 outline-none"
+          className="text-sm max-w-[150px] h-[25px] truncate border rounded px-1 outline-none dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
           value={inputValue}
           autoFocus
           onChange={(e) => setInputValue(e.target.value)}
@@ -168,7 +168,7 @@ function ChatItem({
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
-        <span className="text-sm w-[150px] truncate">{chat.title}</span>
+        <span className="text-sm w-[150px] truncate text-gray-900 dark:text-gray-100">{chat.title}</span>
       )}
       <span className="space-x-2 flex items-center opacity-0 group-hover:opacity-100">
         <Tooltip>

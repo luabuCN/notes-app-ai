@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { CustomProviders } from "@/components/custom-provider";
 import { Toaster } from "@/components/ui/sonner";
+
 export default async function RootLayout({
   children,
   params,

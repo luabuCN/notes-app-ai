@@ -1,6 +1,6 @@
 "use client"
 
-import { Notebook, Star, ImageUp, Search, Settings, Sparkles, PencilRuler, CircleCheckBig } from "lucide-react"
+import { Notebook, Star, ImageUp, Search, Settings, Sparkles , CircleCheckBig } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { usePathname } from 'next/navigation'
 import {
@@ -36,17 +36,12 @@ const items = [
     title: "Ai",
     url: "/ai",
     icon: Sparkles,
+    isActive: true,
   },
   {
     title: "笔记",
     url: "/editor",
     icon: Notebook,
-    isActive: true,
-  },
-  {
-    title: "画板",
-    url: "/draw",
-    icon: PencilRuler,
   },
   {
     title: "收藏",

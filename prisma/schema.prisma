@@ -24,8 +24,6 @@ model User {
   sessions         Session[]
   accounts         Account[]
   conversations    Conversation[]
-  excalidrawGroups ExcalidrawGroup[]
-
   @@map("user")
 }
 
@@ -101,34 +99,3 @@ model Message {
   @@map("message")
 }
 
-model ExcalidrawGroup {
-  id        String   @id @default(cuid())
-  name      String   @default("未命名分组")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  excalidraws Excalidraw[]
-
-  @@map("excalidraw_group")
-}
-
-model Excalidraw {
-  id        String   @id @default(cuid())
-  title     String   @default("未命名草图")
-  emoji     String   @default("📄")
-  version   Int      @default(1)
-  isDeleted Boolean  @default(false)
-  data      Json // 存储草图 JSON 数据
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-
-  groupId String
-  group   ExcalidrawGroup @relation(fields: [groupId], references: [id])
-
-  @@map("excalidraw")
-}
