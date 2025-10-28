@@ -41,25 +41,48 @@ export function ModeToggle() {
       const { clientX, clientY } = event;
       const clipPath = calculateClipPath(clientX, clientY);
 
-      document.startViewTransition(() => {
-        setTheme(nextTheme);
-      }).ready.then(() => {
-        const isDarkAfter =
-          nextTheme === "dark" ||
-          (nextTheme === "system" && systemTheme === "dark");
+      const isDarkAfter =
+        nextTheme === "dark" ||
+        (nextTheme === "system" && systemTheme === "dark");
 
-        document.documentElement.animate(
-          {
-            clipPath: isDarkAfter ? clipPath : [...clipPath].reverse(),
-          },
-          {
-            duration: 650,
-            easing: "ease-in",
-            pseudoElement: isDarkAfter
-              ? "::view-transition-new(root)"
-              : "::view-transition-old(root)",
-          }
-        );
+      const transition = document.startViewTransition(async () => {
+        setTheme(nextTheme);
+      });
+
+      transition.ready.then(() => {
+        const animationConfig = {
+          duration: 650,
+          easing: "ease-in-out",
+          fill: "forwards" as FillMode,
+        };
+
+        if (isDarkAfter) {
+          // 切换到暗色:新内容展开
+          document.documentElement.animate(
+            { clipPath },
+            {
+              ...animationConfig,
+              pseudoElement: "::view-transition-new(root)",
+            }
+          );
+        } else {
+          // 切换到亮色:旧内容收缩
+          document.documentElement.animate(
+            { clipPath: [...clipPath].reverse() },
+            {
+              ...animationConfig,
+              pseudoElement: "::view-transition-old(root)",
+            }
+          );
+          // 新内容保持完全可见
+          document.documentElement.animate(
+            { clipPath: clipPath[1] },
+            {
+              ...animationConfig,
+              pseudoElement: "::view-transition-new(root)",
+            }
+          );
+        }
       });
     },
     [setTheme, systemTheme]
@@ -85,7 +108,7 @@ export function ModeToggle() {
         });
       }
     },
-    [theme, systemTheme, toggleThemeWithTransition]
+    [theme, systemTheme, toggleThemeWithTransition, setTheme]
   );
 
   return (
