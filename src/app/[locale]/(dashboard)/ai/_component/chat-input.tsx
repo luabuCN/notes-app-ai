@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/prompt-input";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, Loader2, Square } from "lucide-react";
-import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
+// import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
 import { Dispatch, SetStateAction } from "react";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { createChat } from "../_action/use-create-chat";
 import { useChatSession } from "@/lib/provider/chat-session-provider"
 import { toast } from "sonner";
+import { ButtonFileUpload } from "./button-file-upload";
 
 type ChatInputProps = {
   input: string;
@@ -31,6 +32,7 @@ type ChatInputProps = {
   status: "streaming" | "ready" | "submitted" | "error";
   hasHistory: boolean;
   isLoading: boolean;
+  onFileUpload: (files: File[]) => void
 };
 
 export function ChatInput({
@@ -39,7 +41,8 @@ export function ChatInput({
   append,
   status,
   hasHistory,
-  isLoading
+  isLoading,
+  onFileUpload
 }: ChatInputProps) {
   const t = useTranslations("ai");
   const { data, isPending } = useSession();
@@ -67,11 +70,9 @@ export function ChatInput({
   const handleSubmit = () => {
     if (!input.trim()) return;
     if (!chatId) {
-      // 没有 chatId，需要先创建对话
       createConversationMutation.mutate();
       return;
     }
-    // 已有 chatId，直接发送消息
     append({ content: input, role: "user" });
     setInput("");
   };
@@ -108,7 +109,12 @@ export function ChatInput({
         className="w-full max-w-(--breakpoint-md)"
       >
         <PromptInputTextarea placeholder={t("inputPlaceholder")} />
-        <PromptInputActions className="justify-end pt-2">
+        <PromptInputActions className="flex w-full justify-between pt-2">
+          <div className="flex gap-2">
+            <ButtonFileUpload
+              onFileUpload={onFileUpload}
+            />
+          </div>
           <PromptInputAction
             tooltip={
               (status === "submitted" || status === "streaming") ? "Stop generation" : "Send message"
@@ -130,7 +136,7 @@ export function ChatInput({
           </PromptInputAction>
         </PromptInputActions>
       </PromptInput>
-      {!hasHistory && !isLoading && (
+      {/* {!hasHistory && !isLoading && (
         <div className="flex flex-wrap justify-center gap-2 mt-4 max-w-(--breakpoint-md)">
           <PromptSuggestion onClick={() => setInput("Tell me a joke")}>
             Tell me a joke
@@ -150,7 +156,7 @@ export function ChatInput({
             Code a React component
           </PromptSuggestion>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
