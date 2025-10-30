@@ -7,21 +7,21 @@ import {
   PromptInputTextarea,
 } from "@/components/ui/prompt-input";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Loader2, Square } from "lucide-react";
+import { ArrowUp, Loader2, Square, X } from "lucide-react";
 // import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ChatRequestOptions } from "ai";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { createChat } from "../_action/use-create-chat";
-import { useChatSession } from "@/lib/provider/chat-session-provider"
+import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { toast } from "sonner";
 import { ButtonFileUpload } from "./button-file-upload";
-
+import { useUploadThing } from "@/lib/uploadthing-client";
 type ChatInputProps = {
   input: string;
   setInput: Dispatch<SetStateAction<string>>;
@@ -32,7 +32,14 @@ type ChatInputProps = {
   status: "streaming" | "ready" | "submitted" | "error";
   hasHistory: boolean;
   isLoading: boolean;
-  onFileUpload: (files: File[]) => void
+};
+
+type FileAttachment = {
+  file: File;
+  preview?: string;
+  uploading: boolean;
+  url?: string;
+  error?: string;
 };
 
 export function ChatInput({
@@ -42,39 +49,165 @@ export function ChatInput({
   status,
   hasHistory,
   isLoading,
-  onFileUpload
 }: ChatInputProps) {
   const t = useTranslations("ai");
   const { data, isPending } = useSession();
   const user = data?.user;
-  const { chatId } = useChatSession()
-  const router = useRouter()
+  const { chatId } = useChatSession();
+  const router = useRouter();
   const queryClient = useQueryClient();
-
+  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
+  // 使用 UploadThing Hook
+  const { startUpload, isUploading } = useUploadThing("editorUploader", {
+    onClientUploadComplete: (res) => {
+      console.log("Upload completed:", res);
+      toast.success("文件上传成功");
+    },
+    onUploadError: (error: Error) => {
+      console.error("Upload error:", error);
+      toast.error(`上传失败: ${error.message}`);
+    },
+  });
   const createConversationMutation = useMutation({
-    mutationFn: () => createChat({
-      title: input.substring(0, 10),
-      userId: user!.id,
-    }),
+    mutationFn: () =>
+      createChat({
+        title: input.substring(0, 10),
+        userId: user!.id,
+      }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['chats'] });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
       // 使用 replace 而不是 push，避免历史记录堆积
-      router.replace(`/ai/c/${data.id}?firstMessage=${encodeURIComponent(input)}`);
+      router.replace(
+        `/ai/c/${data.id}?firstMessage=${encodeURIComponent(input)}`
+      );
     },
     onError: (error) => {
-      console.error('Failed to create chat:', error);
-      toast.error('创建对话失败');
-    }
+      console.error("Failed to create chat:", error);
+      toast.error("创建对话失败");
+    },
   });
+  //上传
+  const handleFileUpload = async (files: File[]) => {
+    const newAttachments: FileAttachment[] = files.map((file) => ({
+      file,
+      preview: file.type.startsWith("image/")
+        ? URL.createObjectURL(file)
+        : undefined,
+      uploading: true,
+    }));
 
-  const handleSubmit = () => {
-    if (!input.trim()) return;
+    setAttachments((prevAttachments) => [
+      ...prevAttachments,
+      ...newAttachments,
+    ]);
+
+    // 上传文件到 uploadthing
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formData = new FormData();
+
+      formData.append("file", file);
+
+      try {
+        // 使用 UploadThing 上传
+        const uploadedFiles = await startUpload(files);
+
+        if (!uploadedFiles) {
+          throw new Error("上传失败");
+        }
+
+        // 更新附件状态
+        setAttachments((prev) =>
+          prev.map((att) => {
+            const uploaded = uploadedFiles.find(
+              (uf) => uf.name === att.file.name && uf.size === att.file.size
+            );
+
+            if (uploaded) {
+              return {
+                ...att,
+                uploading: false,
+                url: uploaded.ufsUrl,
+              };
+            }
+            return att;
+          })
+        );
+      } catch (error) {
+        console.error("Failed to upload file:", error);
+        setAttachments((prev) =>
+          prev.map((att) =>
+            att.file === file
+              ? { ...att, uploading: false, error: "上传文件失败" }
+              : att
+          )
+        );
+        toast.error("上传文件失败");
+      }
+    }
+  };
+  // 移除附件
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments((prev) => {
+      const newAttachments = [...prev];
+      const removed = newAttachments[index];
+      if (removed.preview) {
+        URL.revokeObjectURL(removed.preview);
+      }
+      newAttachments.splice(index, 1);
+      return newAttachments;
+    });
+  };
+  const handleSubmit = async () => {
+    if (!input.trim() && attachments.length === 0) return;
+    
+    // 检查是否有文件正在上传
+    const isUploading = attachments.some(att => att.uploading);
+    if (isUploading) {
+      toast.warning('请等待文件上传完成');
+      return;
+    }
+
+    // 检查是否有上传失败的文件
+    const hasError = attachments.some(att => att.error);
+    if (hasError) {
+      toast.error('请移除上传失败的文件');
+      return;
+    }
+
+    // 构建消息内容
+    const fileUrls = attachments.filter(att => att.url).map(att => att.url);
+    const messageContent = input.trim();
+    
+    // 准备消息数据
+    const messageData: any = {
+      role: "user",
+      content: messageContent,
+    };
+
+    // 如果有文件，添加到消息的 experimental_attachments
+    if (fileUrls.length > 0) {
+      messageData.experimental_attachments = attachments.map(att => ({
+        name: att.file.name,
+        contentType: att.file.type,
+        url: att.url!,
+      }));
+    }
+
     if (!chatId) {
       createConversationMutation.mutate();
       return;
     }
-    append({ content: input, role: "user" });
+
+    // 发送消息
+    await append(messageData);
+    
+    // 清理状态
     setInput("");
+    attachments.forEach(att => {
+      if (att.preview) URL.revokeObjectURL(att.preview);
+    });
+    setAttachments([]);
   };
 
   const handleValueChange = (val: string) => {
@@ -85,7 +218,9 @@ export function ChatInput({
     <div
       className={cn(
         "w-full max-w-3xl z-10 py-2",
-        hasHistory || isLoading ? "absolute bottom-0 left-1/2 -translate-x-1/2" : ""
+        hasHistory || isLoading
+          ? "absolute bottom-0 left-1/2 -translate-x-1/2"
+          : ""
       )}
     >
       {!hasHistory && !isLoading && (
@@ -101,6 +236,44 @@ export function ChatInput({
           </span>
         </div>
       )}
+      {attachments.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {attachments.map((attachment, index) => (
+            <div
+              key={index}
+              className="relative border rounded-lg p-2 bg-secondary/50 flex items-center gap-2"
+            >
+              {attachment.preview && (
+                <img
+                  src={attachment.preview}
+                  alt={attachment.file.name}
+                  className="w-12 h-12 object-cover rounded"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm truncate">{attachment.file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {attachment.uploading && "上传中..."}
+                  {attachment.error && (
+                    <span className="text-red-500">{attachment.error}</span>
+                  )}
+                  {!attachment.uploading && !attachment.error && "已上传"}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => handleRemoveAttachment(index)}
+                disabled={attachment.uploading}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <PromptInput
         value={input}
         onValueChange={handleValueChange}
@@ -111,13 +284,13 @@ export function ChatInput({
         <PromptInputTextarea placeholder={t("inputPlaceholder")} />
         <PromptInputActions className="flex w-full justify-between pt-2">
           <div className="flex gap-2">
-            <ButtonFileUpload
-              onFileUpload={onFileUpload}
-            />
+            <ButtonFileUpload onFileUpload={handleFileUpload} />
           </div>
           <PromptInputAction
             tooltip={
-              (status === "submitted" || status === "streaming") ? "Stop generation" : "Send message"
+              status === "submitted" || status === "streaming"
+                ? "Stop generation"
+                : "Send message"
             }
           >
             <Button
@@ -125,9 +298,13 @@ export function ChatInput({
               size="icon"
               className="h-8 w-8 rounded-full cursor-pointer"
               onClick={handleSubmit}
-              disabled={createConversationMutation.isPending}
+              disabled={
+                createConversationMutation.isPending ||
+                isUploading ||
+                attachments.some((att) => att.uploading)
+              }
             >
-              {(status === "submitted" || status === "streaming") ? (
+              {status === "submitted" || status === "streaming" ? (
                 <Square className="size-3 fill-current" />
               ) : (
                 <ArrowUp className="size-5" />

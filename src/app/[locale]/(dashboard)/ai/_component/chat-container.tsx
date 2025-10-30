@@ -29,6 +29,14 @@ export function ChatContainer() {
       initialMessages: initMessage,
       // 添加 body 配置，确保 chatId 被传递
       body: chatId ? { chatId } : undefined,
+      experimental_prepareRequestBody: ({ messages }) => {
+        return { 
+          messages: messages.map(msg => ({
+            ...msg,
+            experimental_attachments: msg.experimental_attachments || []
+          }))
+        };
+      },
     });
 
   // 保存对话消息

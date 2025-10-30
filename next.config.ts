@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ['@lobehub/ui'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'm5ey4tjnnk.ufs.sh',
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);
