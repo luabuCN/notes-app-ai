@@ -107,14 +107,38 @@ export function ChatContainer() {
     }),
     [messages, status, handleDelete, handleEdit, reload]
   );
-
+  useEffect(() => {
+    if (status === "ready" && messages.length > 0) {
+      // 确保消息按正确顺序排列（按 createdAt 或消息索引）
+      const sortedMessages = [...messages].sort((a, b) => {
+        // 如果有 createdAt，按时间排序
+        if (a.createdAt && b.createdAt) {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+        // 否则保持原始顺序
+        return 0;
+      });
+      
+      // 只在顺序改变时才更新
+      const isOrderChanged = sortedMessages.some((msg, idx) => msg.id !== messages[idx]?.id);
+      if (isOrderChanged) {
+        setMessages(sortedMessages);
+      }
+    }
+  }, [status, messages, setMessages]);
   // 自动保存消息
   useEffect(() => {
     if (status === "ready" && chatId && messages.length > 0 &&
       messages.length !== lastSavedMessageCountRef.current) {
-
+  
       const lastMessage = messages[messages.length - 1];
-      if (lastMessage && lastMessage.content && lastMessage.content.trim() !== '') {
+      
+      // 确保最后一条消息是完整的助手消息
+      if (lastMessage && 
+          lastMessage.role === "assistant" && 
+          lastMessage.content && 
+          lastMessage.content.trim() !== '') {
+        
         saveMessageMutation.mutate({
           conversationId: chatId,
           messages: messages
@@ -122,11 +146,11 @@ export function ChatContainer() {
         lastSavedMessageCountRef.current = messages.length;
       }
     }
-
+  
     if (status === "error") {
       toast.warning("出现错误，请稍后重试", { style: { color: "red" } });
     }
-  }, [status, messages, chatId,saveMessageMutation]);
+  }, [status, messages, chatId, saveMessageMutation]);
 
   const chatInputProps = useMemo(
     () => ({

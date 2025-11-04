@@ -9,7 +9,6 @@ import { ScrollButton } from "@/components/ui/scroll-button"
 import { Message as MessageType } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
-import { AnimatePresence, motion } from "motion/react"
 
 type ConversationProps = {
   messages: MessageType[]

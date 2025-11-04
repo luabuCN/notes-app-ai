@@ -174,10 +174,17 @@ export function ChatInput({
       toast.error('请移除上传失败的文件');
       return;
     }
+    
+    // 立即清理输入框和附件（在消息发送之前）
+    const messageContent = input.trim();
+    setInput("");
+    attachments.forEach(att => {
+      if (att.preview) URL.revokeObjectURL(att.preview);
+    });
+    setAttachments([]);
 
     // 构建消息内容
     const fileUrls = attachments.filter(att => att.url).map(att => att.url);
-    const messageContent = input.trim();
     
     // 准备消息数据
     const messageData: any = {
