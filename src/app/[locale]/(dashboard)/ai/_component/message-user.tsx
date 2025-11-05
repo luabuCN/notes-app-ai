@@ -81,7 +81,7 @@ export function MessageUser({
     <div className="w-full flex justify-center">
       <MessageContainer
         className={cn(
-          "group flex w-full max-w-3xl flex-col items-end gap-0.5 px-6 pb-2",
+          "group flex w-full max-w-6xl flex-col items-end gap-0.5 px-6 pb-2",
           hasScrollAnchor && "min-h-scroll-anchor",
           className
         )}

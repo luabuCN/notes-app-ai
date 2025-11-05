@@ -7,7 +7,7 @@ import {
   PromptInputTextarea,
 } from "@/components/ui/prompt-input";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Loader2, Square, X } from "lucide-react";
+import { ArrowUp, Loader2, Square } from "lucide-react";
 // import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
 import { CreateMessage, Message } from "@ai-sdk/react";
@@ -22,6 +22,9 @@ import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { toast } from "sonner";
 import { ButtonFileUpload } from "./button-file-upload";
 import { useUploadThing } from "@/lib/uploadthing-client";
+import { FileList } from "./file-list";
+import { FileAttachment } from "./types";
+
 type ChatInputProps = {
   input: string;
   setInput: Dispatch<SetStateAction<string>>;
@@ -32,14 +35,6 @@ type ChatInputProps = {
   status: "streaming" | "ready" | "submitted" | "error";
   hasHistory: boolean;
   isLoading: boolean;
-};
-
-type FileAttachment = {
-  file: File;
-  preview?: string;
-  uploading: boolean;
-  url?: string;
-  error?: string;
 };
 
 export function ChatInput({
@@ -147,14 +142,17 @@ export function ChatInput({
     }
   };
   // 移除附件
-  const handleRemoveAttachment = (index: number) => {
+  const handleRemoveAttachment = (file: File) => {
     setAttachments((prev) => {
-      const newAttachments = [...prev];
-      const removed = newAttachments[index];
-      if (removed.preview) {
-        URL.revokeObjectURL(removed.preview);
-      }
-      newAttachments.splice(index, 1);
+      const newAttachments = prev.filter((att) => {
+        if (att.file === file || (att.file.name === file.name && att.file.size === file.size)) {
+          if (att.preview) {
+            URL.revokeObjectURL(att.preview);
+          }
+          return false;
+        }
+        return true;
+      });
       return newAttachments;
     });
   };
@@ -243,44 +241,7 @@ export function ChatInput({
           </span>
         </div>
       )}
-      {attachments.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-2">
-          {attachments.map((attachment, index) => (
-            <div
-              key={index}
-              className="relative border rounded-lg p-2 bg-secondary/50 flex items-center gap-2"
-            >
-              {attachment.preview && (
-                <img
-                  src={attachment.preview}
-                  alt={attachment.file.name}
-                  className="w-12 h-12 object-cover rounded"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm truncate">{attachment.file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {attachment.uploading && "上传中..."}
-                  {attachment.error && (
-                    <span className="text-red-500">{attachment.error}</span>
-                  )}
-                  {!attachment.uploading && !attachment.error && "已上传"}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => handleRemoveAttachment(index)}
-                disabled={attachment.uploading}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
-
+      
       <PromptInput
         value={input}
         onValueChange={handleValueChange}
@@ -288,6 +249,7 @@ export function ChatInput({
         onSubmit={handleSubmit}
         className="w-full max-w-(--breakpoint-md)"
       >
+        <FileList files={attachments} onFileRemove={handleRemoveAttachment} />
         <PromptInputTextarea placeholder={t("inputPlaceholder")} />
         <PromptInputActions className="flex w-full justify-between pt-2">
           <div className="flex gap-2">
