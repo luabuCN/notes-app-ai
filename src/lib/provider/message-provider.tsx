@@ -38,8 +38,6 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
   }, [chatId])
 
   useEffect(() => {
-    console.log(chatData,'chatData-------------');
-    
     if(chatData?.messages) {
       setMessages(chatData.messages as unknown as UIMessage[])
     }

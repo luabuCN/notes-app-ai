@@ -16,6 +16,7 @@ import { DefaultChatTransport } from "ai";
 import { useSession } from "@/lib/auth-client";
 import { FileAttachment } from "./types";
 import { useRouter } from "@/i18n/navigation";
+
 export function ChatContainer() {
   const { messages: initMessage, isLoading } = useMessages();
   const { chatId } = useChatSession();
@@ -32,6 +33,10 @@ export function ChatContainer() {
     attachments: FileAttachment[];
   } | null>(null);
 
+  // 新增：存储即将创建的聊天的临时 ID 和消息
+  const tempChatIdRef = useRef<string | null>(null);
+  const tempMessagesRef = useRef<any[]>([]);
+
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const { messages, status, regenerate, setMessages, sendMessage } = useChat({
@@ -42,13 +47,16 @@ export function ChatContainer() {
     messages: initMessage,
 
     onFinish: (data) => {
-      const { message, messages } = data
+      const { message, messages } = data;
       console.log("finish", message, messages);
 
       // 首次对话：创建会话
       if (!chatId && pendingMessageRef.current) {
         const pendingData = pendingMessageRef.current;
         pendingMessageRef.current = null;
+
+        // 在创建之前，保存当前消息到临时存储
+        tempMessagesRef.current = messages;
 
         createConversationMutation.mutate({
           firstMessage: pendingData.text,
@@ -94,7 +102,9 @@ export function ChatContainer() {
     },
     onError: (error: any) => {
       console.error("保存对话失败", error);
-      toast.warning("保存对话失败，请稍后重试", { style: { color: "red" } });
+      toast.warning("保存对话失败，请稍后重试", {
+        style: { color: "red" },
+      });
     },
   });
 
@@ -106,24 +116,43 @@ export function ChatContainer() {
         userId: user!.id,
       }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
-      router.replace(`/ai/c/${data.id}`);
+      // 保存新创建的聊天 ID
+      tempChatIdRef.current = data.id;
+
+      // 立即更新本地消息缓存，避免路由切换后出现闪屏
+      queryClient.setQueryData(
+        ["chat-messages", data.id],
+        {
+          messages: tempMessagesRef.current,
+        }
+      );
 
       // 保存当前消息
-      if (messages.length > 0) {
+      if (tempMessagesRef.current.length > 0) {
         saveMessageMutation.mutate({
           conversationId: data.id,
-          messages
+          messages: tempMessagesRef.current,
         });
       }
+
+      // 路由跳转（此时缓存已经有数据，不会导致闪屏）
+      router.push(`/ai/c/${data.id}`);
+
+      // 路由跳转后清理临时数据
+      setTimeout(() => {
+        tempChatIdRef.current = null;
+        tempMessagesRef.current = [];
+      }, 100);
+
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
     onError: (error) => {
       console.error("创建会话失败:", error);
       toast.error("创建对话失败");
+      tempMessagesRef.current = [];
+      tempChatIdRef.current = null;
     },
   });
-
- 
 
   // 初始化历史消息
   useEffect(() => {
@@ -134,7 +163,12 @@ export function ChatContainer() {
 
   // 处理 URL 中的 firstMessage
   useEffect(() => {
-    if (!isLoading && firstMessage && chatId && !hasProcessedFirstMessage.current) {
+    if (
+      !isLoading &&
+      firstMessage &&
+      chatId &&
+      !hasProcessedFirstMessage.current
+    ) {
       hasProcessedFirstMessage.current = true;
       sendMessage({ text: firstMessage });
       const url = new URL(window.location.href);
