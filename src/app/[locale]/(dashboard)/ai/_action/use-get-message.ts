@@ -13,16 +13,12 @@ export async function getChatWithMessages(chatId: string) {
   }
 
   const conversation = await prisma.conversation.findUnique({
-    where: {
-      id: chatId,
-    },
+    where: { id: chatId },
     include: {
       messages: {
-        orderBy: {
-          createdAt: 'asc'
-        }
-      }
-    }
+        orderBy: { createdAt: "asc" }, 
+      },
+    },
   });
 
   if (!conversation) {
@@ -32,15 +28,12 @@ export async function getChatWithMessages(chatId: string) {
   if (conversation.userId !== session.user.id) {
     throw new Error("无权限访问此对话");
   }
-  const formattedMessages = conversation.messages.map(msg => ({
-    id: msg.id,
-    role: msg.role as 'user' | 'assistant' | 'system',
-    parts: msg.parts,
-    createdAt: msg.createdAt,
-  }));
+
+  const formattedMessages = conversation.messages
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
 
   return {
     conversation,
-    messages: formattedMessages
+    messages: formattedMessages,
   };
 }
