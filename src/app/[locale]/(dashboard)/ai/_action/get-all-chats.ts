@@ -12,23 +12,28 @@ export async function getAllChats(title?: string) {
     throw new Error("未登录");
   }
 
-  const chats = await prisma.user.findFirst({
-    where: {
-      id: session.user.id
-    },
-    include: {
-      conversations: {
-        where: title ? {
-          title: {
-            contains: title,
-            mode: 'insensitive'
+  try {
+    const chats = await prisma.user.findFirst({
+      where: {
+        id: session.user.id
+      },
+      include: {
+        conversations: {
+          where: title ? {
+            title: {
+              contains: title,
+              mode: 'insensitive'
+            }
+          } : {},
+          orderBy: {
+            createdAt: "desc"
           }
-        } : {},
-        orderBy: {
-          createdAt: "desc"
         }
       }
-    }
-  })
-  return chats?.conversations
+    });
+    return chats?.conversations;
+  } catch (error) {
+    console.error(error);
+    throw new Error("获取全部对话失败");
+  }
 }

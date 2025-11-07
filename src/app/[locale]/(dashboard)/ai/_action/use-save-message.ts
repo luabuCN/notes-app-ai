@@ -29,13 +29,11 @@ export async function saveMessages(conversationId: string, messages: Message[]) 
           prisma.message.upsert({
             where: { id: msg.id },
             update: {
-              content: msg.content,
               parts: msg.parts || {},
             },
             create: {
               id: msg.id,
               role: msg.role,
-              content: msg.content,
               parts: msg.parts || {},
               conversationId,
             },

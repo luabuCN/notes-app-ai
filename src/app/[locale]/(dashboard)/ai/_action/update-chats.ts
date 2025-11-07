@@ -26,6 +26,7 @@ export async function updateChat(chatId: string, title: string) {
     });
     return { success: true };
   } catch (error) {
+    console.error(error);
     throw new Error("更新失败");
   }
 }

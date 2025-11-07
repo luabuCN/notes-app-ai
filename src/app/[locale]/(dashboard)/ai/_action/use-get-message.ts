@@ -35,7 +35,6 @@ export async function getChatWithMessages(chatId: string) {
   const formattedMessages = conversation.messages.map(msg => ({
     id: msg.id,
     role: msg.role as 'user' | 'assistant' | 'system',
-    content: msg.content,
     parts: msg.parts,
     createdAt: msg.createdAt,
   }));

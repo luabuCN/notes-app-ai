@@ -19,12 +19,16 @@ export async function createChat(chatData: ConversationWithMessages) {
   if(session.user.id !== chatData.userId){
     throw new Error("无权限");
   }
-  const conversation = await prisma.conversation.create({
-    data: {
-      title: chatData.title,
-      userId: chatData.userId,
-    },
-  });
-
-  return conversation;
+  try {
+    const conversation = await prisma.conversation.create({
+      data: {
+        title: chatData.title,
+        userId: chatData.userId,
+      },
+    });
+    return conversation;
+  } catch (error) {
+    console.error(error);
+    throw new Error("创建对话失败");
+  }
 }
