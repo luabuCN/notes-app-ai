@@ -23,26 +23,30 @@ export async function saveMessages(conversationId: string, messages: Message[]) 
     }
 
     //批量保存信息
-    const savedMessages = await Promise.all(
-      messages.map((msg: any) =>
-        prisma.message.upsert({
-          where: { id: msg.id },
-          update: {
-            content: msg.content,
-            parts: msg.parts || {},
-          },
-          create: {
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            parts: msg.parts || {},
-            conversationId,
-          },
-        })
-      )
-    )
-    
-    return {
-        messages : savedMessages
+    try {
+      const savedMessages = await Promise.all(
+        messages.map((msg: any) =>
+          prisma.message.upsert({
+            where: { id: msg.id },
+            update: {
+              content: msg.content,
+              parts: msg.parts || {},
+            },
+            create: {
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              parts: msg.parts || {},
+              conversationId,
+            },
+          })
+        )
+      );
+      return {
+        messages: savedMessages,
+      };
+    } catch (error: any) {
+      console.error("批量保存消息时出错:", error);
+      throw new Error("批量保存消息失败：" + (error?.message || error));
     }
 }

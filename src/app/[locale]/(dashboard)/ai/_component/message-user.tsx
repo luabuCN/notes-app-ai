@@ -1,14 +1,6 @@
 "use client"
 
 import {
-  MorphingDialog,
-  MorphingDialogClose,
-  MorphingDialogContainer,
-  MorphingDialogContent,
-  MorphingDialogImage,
-  MorphingDialogTrigger,
-} from "@/components/motion-primitives/morphing-dialog"
-import {
   MessageAction,
   MessageActions,
   Message as MessageContainer,
@@ -16,22 +8,13 @@ import {
 } from "@/components/ui/message"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Message as MessageType } from "@ai-sdk/react"
-import Image from "next/image"
 import { useRef, useState } from "react"
 import { Check, Copy, Trash } from "lucide-react"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { useSession } from "@/lib/auth-client"
 
-
-const getTextFromDataUrl = (dataUrl: string) => {
-  const base64 = dataUrl.split(",")[1]
-  return base64
-}
-
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
-  attachments?: MessageType["experimental_attachments"]
   children: string
   copied: boolean
   copyToClipboard: () => void
@@ -44,7 +27,6 @@ export type MessageUserProps = {
 
 export function MessageUser({
   hasScrollAnchor,
-  attachments,
   children,
   copied,
   copyToClipboard,
@@ -86,48 +68,7 @@ export function MessageUser({
           className
         )}
       >
-        {attachments?.map((attachment, index) => (
-          <div
-            className="flex flex-row gap-2"
-            key={`${attachment.name}-${index}`}
-          >
-            {attachment.contentType?.startsWith("image") ? (
-              <MorphingDialog
-                transition={{
-                  type: "spring",
-                  stiffness: 280,
-                  damping: 18,
-                  mass: 0.3,
-                }}
-              >
-                <MorphingDialogTrigger className="z-10">
-                  <Image
-                    className="mb-1 w-40 rounded-md"
-                    key={attachment.name}
-                    src={attachment.url}
-                    alt={attachment.name || "Attachment"}
-                    width={160}
-                    height={120}
-                  />
-                </MorphingDialogTrigger>
-                <MorphingDialogContainer>
-                  <MorphingDialogContent className="relative rounded-lg">
-                    <MorphingDialogImage
-                      src={attachment.url}
-                      alt={attachment.name || ""}
-                      className="max-h-[90vh] max-w-[90vw] object-contain"
-                    />
-                  </MorphingDialogContent>
-                  <MorphingDialogClose className="text-primary" />
-                </MorphingDialogContainer>
-              </MorphingDialog>
-            ) : attachment.contentType?.startsWith("text") ? (
-              <div className="text-primary mb-3 h-24 w-40 overflow-hidden rounded-md border p-2 text-xs">
-                {getTextFromDataUrl(attachment.url)}
-              </div>
-            ) : null}
-          </div>
-        ))}
+
         {isEditing ? (
           <div
             className="bg-accent relative flex min-w-[180px] flex-col gap-2 rounded-3xl px-5 py-2.5"

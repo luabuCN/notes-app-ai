@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { useSearchParams } from "next/navigation";
 import { saveMessages } from "../_action/use-save-message";
+import { DefaultChatTransport } from "ai";
 // import { useLocale } from "next-intl";
 
 export function ChatContainer() {
@@ -23,20 +24,20 @@ export function ChatContainer() {
   const lastSavedMessageCountRef = useRef(0);
   const hasProcessedFirstMessage = useRef(false);
   
-  const { messages, input, status, reload, setMessages, setInput, append } =
+  const { messages, status, regenerate , setMessages,  sendMessage  } =
     useChat({
-      api: "/api/ai/chat",
-      initialMessages: initMessage,
-      // 添加 body 配置，确保 chatId 被传递
-      body: chatId ? { chatId } : undefined,
-      experimental_prepareRequestBody: ({ messages }) => {
-        return { 
-          messages: messages.map(msg => ({
-            ...msg,
-            experimental_attachments: msg.experimental_attachments || []
-          }))
-        };
+      transport: new DefaultChatTransport({
+        api: "/api/ai/chat",
+        body: chatId ? { chatId } : undefined,
+      }),
+      messages: initMessage,
+      onFinish: (message) => { 
+        console.log("finish", message);
       },
+      onError: (error:any) => {
+        console.log("error", error);
+        toast.error(error);
+      }
     });
 
   // 保存对话消息
@@ -46,8 +47,9 @@ export function ChatContainer() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId], exact: true });
     },
-    onError: (error:any) => {
-      toast.error(error);
+    onError: (error: any) => {
+      console.log("error", error);
+      toast.warning("保存对话失败，请稍后重试", { style: { color: "red" } });
     }
   })
 
@@ -66,13 +68,15 @@ export function ChatContainer() {
         chatId && 
         !hasProcessedFirstMessage.current) {
       hasProcessedFirstMessage.current = true;
-      append({ content: firstMessage, role: "user" });
+      sendMessage({
+        text: firstMessage
+      });
       // 清理 URL 中的 firstMessage 参数
       const url = new URL(window.location.href);
       url.searchParams.delete('firstMessage');
       window.history.replaceState({}, '', url.toString());
     }
-  }, [isLoading, firstMessage, chatId, append])
+  }, [isLoading, firstMessage, chatId, sendMessage])
 
   // 重置 firstMessage 标记当 chatId 改变
   useEffect(() => {
@@ -103,29 +107,11 @@ export function ChatContainer() {
       status,
       onDelete: handleDelete,
       onEdit: handleEdit,
-      onReload: reload,
+      onregenerate : regenerate ,
     }),
-    [messages, status, handleDelete, handleEdit, reload]
+    [messages, status, handleDelete, handleEdit, regenerate ]
   );
-  useEffect(() => {
-    if (status === "ready" && messages.length > 0) {
-      // 确保消息按正确顺序排列（按 createdAt 或消息索引）
-      const sortedMessages = [...messages].sort((a, b) => {
-        // 如果有 createdAt，按时间排序
-        if (a.createdAt && b.createdAt) {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        }
-        // 否则保持原始顺序
-        return 0;
-      });
-      
-      // 只在顺序改变时才更新
-      const isOrderChanged = sortedMessages.some((msg, idx) => msg.id !== messages[idx]?.id);
-      if (isOrderChanged) {
-        setMessages(sortedMessages);
-      }
-    }
-  }, [status, messages, setMessages]);
+
   // 自动保存消息
   useEffect(() => {
     if (status === "ready" && chatId && messages.length > 0 &&
@@ -136,8 +122,8 @@ export function ChatContainer() {
       // 确保最后一条消息是完整的助手消息
       if (lastMessage && 
           lastMessage.role === "assistant" && 
-          lastMessage.content && 
-          lastMessage.content.trim() !== '') {
+          lastMessage.parts && 
+          lastMessage.parts.length > 0) {
         
         saveMessageMutation.mutate({
           conversationId: chatId,
@@ -154,14 +140,12 @@ export function ChatContainer() {
 
   const chatInputProps = useMemo(
     () => ({
-      input,
-      setInput,
-      append,
+      sendMessage,
       status,
       hasHistory: messages.length > 0,
       isLoading,
     }),
-    [input, setInput, append, status, messages, isLoading]
+    [sendMessage , status, messages, isLoading]
   );
 
   return (

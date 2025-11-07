@@ -10,9 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp, Loader2, Square } from "lucide-react";
 // import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { useSession } from "@/lib/auth-client";
-import { CreateMessage, Message } from "@ai-sdk/react";
-import { Dispatch, SetStateAction, useState } from "react";
-import { ChatRequestOptions } from "ai";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/navigation";
@@ -23,24 +21,17 @@ import { toast } from "sonner";
 import { ButtonFileUpload } from "./button-file-upload";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { FileList } from "./file-list";
-import { FileAttachment } from "./types";
+import { FileAttachment, type SendMessage } from "./types";
 
 type ChatInputProps = {
-  input: string;
-  setInput: Dispatch<SetStateAction<string>>;
-  append: (
-    message: Message | CreateMessage,
-    chatRequestOptions?: ChatRequestOptions
-  ) => Promise<string | null | undefined>;
+  sendMessage: SendMessage;
   status: "streaming" | "ready" | "submitted" | "error";
   hasHistory: boolean;
   isLoading: boolean;
 };
 
 export function ChatInput({
-  input,
-  setInput,
-  append,
+  sendMessage,
   status,
   hasHistory,
   isLoading,
@@ -51,6 +42,7 @@ export function ChatInput({
   const { chatId } = useChatSession();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   // 使用 UploadThing Hook
   const { startUpload, isUploading } = useUploadThing("editorUploader", {
@@ -59,7 +51,6 @@ export function ChatInput({
       toast.success("文件上传成功");
     },
     onUploadError: (error: Error) => {
-      console.error("Upload error:", error);
       toast.error(`上传失败: ${error.message}`);
     },
   });
@@ -173,39 +164,35 @@ export function ChatInput({
       return;
     }
     
-    // 立即清理输入框和附件（在消息发送之前）
+    // 准备消息内容（不要在此处清空输入与附件，以免在创建首个会话时丢失内容）
     const messageContent = input.trim();
-    setInput("");
-    attachments.forEach(att => {
-      if (att.preview) URL.revokeObjectURL(att.preview);
-    });
-    setAttachments([]);
 
     // 构建消息内容
-    const fileUrls = attachments.filter(att => att.url).map(att => att.url);
+    // const fileUrls = attachments.filter(att => att.url).map(att => att.url);
     
     // 准备消息数据
-    const messageData: any = {
+    const messageData = {
       role: "user",
-      content: messageContent,
+      text: messageContent,
     };
 
     // 如果有文件，添加到消息的 experimental_attachments
-    if (fileUrls.length > 0) {
-      messageData.experimental_attachments = attachments.map(att => ({
-        name: att.file.name,
-        contentType: att.file.type,
-        url: att.url!,
-      }));
-    }
+    // if (fileUrls.length > 0) {
+    //   messageData.experimental_attachments = attachments.map(att => ({
+    //     name: att.file.name,
+    //     contentType: att.file.type,
+    //     url: att.url!,
+    //   }));
+    // }
 
     if (!chatId) {
+      // 首次会话：仅创建会话并通过路由参数传递首条消息，避免提前清空输入
       createConversationMutation.mutate();
       return;
     }
 
     // 发送消息
-    await append(messageData);
+    await sendMessage(messageData);
     
     // 清理状态
     setInput("");

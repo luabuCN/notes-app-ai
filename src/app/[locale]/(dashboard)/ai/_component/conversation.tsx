@@ -6,16 +6,16 @@ import {
 } from "@/components/ui/chat-container"
 import { Loader } from "@/components/ui/loader"
 import { ScrollButton } from "@/components/ui/scroll-button"
-import { Message as MessageType } from "@ai-sdk/react"
+import type { UIMessage } from "@ai-sdk/react"
 import { useRef } from "react"
 import { Message } from "./message"
 
 type ConversationProps = {
-  messages: MessageType[]
+  messages: UIMessage[]
   status?: "streaming" | "ready" | "submitted" | "error"
   onDelete: (id: string) => void
   onEdit: (id: string, newText: string) => void
-  onReload: () => void
+  onregenerate: () => void
 }
 
 export function Conversation({
@@ -23,7 +23,7 @@ export function Conversation({
   status = "ready",
   onDelete,
   onEdit,
-  onReload,
+  onregenerate,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
   if (!messages || messages.length === 0) return <></>
@@ -52,16 +52,18 @@ export function Conversation({
                 key={message.id}
                 id={message.id}
                 variant={message.role}
-                attachments={message.experimental_attachments}
                 isLast={isLast}
                 onDelete={onDelete}
                 onEdit={onEdit}
-                onReload={onReload}
+                onReload={onregenerate}
                 hasScrollAnchor={hasScrollAnchor}
                 parts={message.parts}
                 status={status}
               >
-                {message.content}
+                {(() => {
+                  const textPart = message.parts?.find((part: any) => part.type === "text") as any;
+                  return textPart?.text || "";
+                })()}
               </Message>
             )
           })}

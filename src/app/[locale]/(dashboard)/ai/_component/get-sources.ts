@@ -1,23 +1,22 @@
-import type { Message as MessageAISDK } from "@ai-sdk/react"
+export function getSources(parts: any[]) {
+  if (!parts || !Array.isArray(parts)) {
+    return []
+  }
 
-export function getSources(parts: MessageAISDK["parts"]) {
   const sources = parts
     ?.filter(
-      (part) => part.type === "source" || part.type === "tool-invocation"
+      (part) => part.type === "source-url" || part.type === "source-document" || part.type?.startsWith("tool-")
     )
     .map((part) => {
-      if (part.type === "source") {
-        return part.source
+      if (part.type === "source-url" || part.type === "source-document") {
+        return part.source || part
       }
 
-      if (
-        part.type === "tool-invocation" &&
-        part.toolInvocation.state === "result"
-      ) {
-        const result = part.toolInvocation.result
+      if (part.type?.startsWith("tool-") && part.state === "result") {
+        const result = part.output || part.result
 
         if (
-          part.toolInvocation.toolName === "summarizeSources" &&
+          part.toolName === "summarizeSources" &&
           result?.result?.[0]?.citations
         ) {
           return result.result.flatMap((item: { citations?: unknown[] }) => item.citations || [])

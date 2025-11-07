@@ -5,11 +5,8 @@ import {
   MessageContent,
 } from "@/components/ui/message";
 import { cn } from "@/lib/utils";
-import type { Message as MessageAISDK } from "@ai-sdk/react";
 import { getSources } from "./get-sources";
-import { Reasoning } from "./reasoning";
 import { SourcesList } from "./sources-list";
-import { ToolInvocation } from "./tool-invocation";
 import { Check, Copy, RotateCw } from "lucide-react";
 
 type MessageAssistantProps = {
@@ -19,7 +16,7 @@ type MessageAssistantProps = {
   copied?: boolean;
   copyToClipboard?: () => void;
   onReload?: () => void;
-  parts?: MessageAISDK["parts"];
+  parts?: any[];
   status?: "streaming" | "ready" | "submitted" | "error";
   className?: string;
 };
@@ -35,12 +32,14 @@ export function MessageAssistant({
   status,
   className,
 }: MessageAssistantProps) {
-  const sources = getSources(parts);
+  const sources = getSources(parts || []);
   const toolInvocationParts = parts?.filter(
     (part) => part.type === "tool-invocation"
   );
   const reasoningParts = parts?.find((part) => part.type === "reasoning");
-  const contentNullOrEmpty = children === null || children === "";
+  const textPart = parts?.find((part) => part.type === "text");
+  const actualContent = textPart?.text || children;
+  const contentNullOrEmpty = actualContent === null || actualContent === "";
   const isLastStreaming = status === "streaming" && isLast;
 
   return (
@@ -55,14 +54,15 @@ export function MessageAssistant({
 
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
         {reasoningParts && reasoningParts.reasoning && (
-          <Reasoning
-            reasoning={reasoningParts.reasoning}
-            isStreaming={status === "streaming"}
-          />
+          <div className="text-sm text-muted-foreground italic p-3 bg-muted/50 rounded-lg">
+            <strong>Reasoning:</strong> {reasoningParts.reasoning}
+          </div>
         )}
 
         {toolInvocationParts && toolInvocationParts.length > 0 && (
-          <ToolInvocation toolInvocations={toolInvocationParts} />
+          <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg">
+            <strong>Tool Usage:</strong> {toolInvocationParts.length} tool(s) invoked
+          </div>
         )}
 
         {contentNullOrEmpty ? null : (
@@ -73,7 +73,7 @@ export function MessageAssistant({
             )}
             markdown={true}
           >
-            {children}
+            {actualContent}
           </MessageContent>
         )}
 
