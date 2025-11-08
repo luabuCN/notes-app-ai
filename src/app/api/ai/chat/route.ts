@@ -27,6 +27,14 @@ export async function POST(req: NextRequest) {
       const { provider, apiKey, modelName, baseURL } = config;
       
       switch (provider) {
+        case "openai": {
+          const openai = createOpenAI({
+            apiKey,
+            ...(baseURL ? { baseURL } : {}),
+          });
+          model = openai(modelName);
+          break;
+        }
         case "gemini": {
           const google = createGoogleGenerativeAI({
             apiKey,
@@ -69,6 +77,5 @@ export async function POST(req: NextRequest) {
     stopWhen: stepCountIs(5),
     tools: {} as ToolSet,
   });
-
   return result.toUIMessageStreamResponse();
 }

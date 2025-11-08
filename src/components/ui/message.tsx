@@ -96,7 +96,7 @@ export type MessageActionProps = {
   tooltip: React.ReactNode
   children: React.ReactNode
   side?: "top" | "bottom" | "left" | "right"
-} & React.ComponentProps<typeof Tooltip>
+} & Omit<React.ComponentProps<typeof Tooltip>, "key">
 
 const MessageAction = ({
   tooltip,
@@ -105,9 +105,12 @@ const MessageAction = ({
   side = "top",
   ...props
 }: MessageActionProps) => {
+  // Destructure key to ensure it's not spread to Tooltip (React may add key at runtime)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { key: _key, ...tooltipProps } = props as typeof props & { key?: React.Key }
   return (
     <TooltipProvider>
-      <Tooltip {...props}>
+      <Tooltip {...tooltipProps}>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent side={side} className={className}>
           {tooltip}

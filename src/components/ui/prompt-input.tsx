@@ -104,6 +104,7 @@ function PromptInputTextarea({
 }: PromptInputTextareaProps) {
   const { value, setValue, maxHeight, onSubmit, disabled } = usePromptInput()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isComposing, setIsComposing] = useState(false)
 
   useEffect(() => {
     if (disableAutosize) return
@@ -116,8 +117,17 @@ function PromptInputTextarea({
         : `min(${textareaRef.current.scrollHeight}px, ${maxHeight})`
   }, [value, maxHeight, disableAutosize])
 
+  const handleCompositionStart = () => {
+    setIsComposing(true)
+  }
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // 如果正在使用输入法组合（如中文输入），不触发提交
+    if (e.key === "Enter" && !e.shiftKey && !isComposing) {
       e.preventDefault()
       onSubmit?.()
     }
@@ -130,6 +140,8 @@ function PromptInputTextarea({
       value={value}
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       className={cn(
         "text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
         className

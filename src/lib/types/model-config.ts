@@ -1,4 +1,4 @@
-export type ModelProvider = "gemini" | "deepseek" | "openrouter";
+export type ModelProvider = "gemini" | "deepseek" | "openrouter" | "openai";
 
 export interface ModelConfig {
   id?: string;

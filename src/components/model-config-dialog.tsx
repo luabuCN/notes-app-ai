@@ -88,6 +88,8 @@ export function ModelConfigDialog({
   // 根据供应商设置默认模型名称
   const getDefaultModelName = (provider: ModelProvider): string => {
     switch (provider) {
+      case "openai":
+        return "gpt-4o-mini";
       case "gemini":
         return "gemini-2.5-flash";
       case "deepseek":
@@ -125,6 +127,7 @@ export function ModelConfigDialog({
                 <SelectValue placeholder="选择供应商" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="openai">OpenAI</SelectItem>
                 <SelectItem value="gemini">Gemini</SelectItem>
                 <SelectItem value="deepseek">DeepSeek</SelectItem>
                 <SelectItem value="openrouter">OpenRouter</SelectItem>
