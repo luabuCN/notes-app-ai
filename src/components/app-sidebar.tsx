@@ -20,6 +20,7 @@ import { LocaleModelToggle } from './locale-model-toggle'
 import { cn } from "@/lib/utils"
 import { Link } from '@/i18n/navigation'
 import { useEffect, useState } from "react"
+import { ModelConfigDialog } from "./model-config-dialog"
 // Menu items.
 const items = [
   {
@@ -59,6 +60,7 @@ export function AppSidebar() {
   const isMobile = useIsMobile();
   const pathname = usePathname();
   const [pathWithoutLocale, setPathWithoutLocale] = useState<string>()
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   //去除国际化的路径
 
   useEffect(() => {
@@ -147,13 +149,18 @@ export function AppSidebar() {
             hidden: isMobile ? false : true,
           }}
         >
-          <a href="#">
-            <div className="flex size-8 items-center w-full justify-center rounded-lg">
-              <Settings className="size-4" />
-            </div>
-          </a>
+          <button
+            onClick={() => setIsConfigDialogOpen(true)}
+            className="flex size-8 items-center w-full justify-center rounded-lg"
+          >
+            <Settings className="size-4" />
+          </button>
         </SidebarMenuButton>
       </SidebarFooter>
+      <ModelConfigDialog
+        open={isConfigDialogOpen}
+        onOpenChange={setIsConfigDialogOpen}
+      />
     </Sidebar>
   )
 }

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ModelConfigProvider } from "@/lib/provider/model-config-provider";
 
 export function CustomProviders({
   children,
@@ -23,7 +24,9 @@ export function CustomProviders({
         disableTransitionOnChange
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <ModelConfigProvider>
+            {children}
+          </ModelConfigProvider>
         </NextIntlClientProvider>
       </ThemeProvider>
     </QueryClientProvider>
