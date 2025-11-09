@@ -43,19 +43,21 @@ export function ChatInput({
   const t = useTranslations("ai");
   const { data, isPending } = useSession();
   const user = data?.user;
-  
-  // 使用 UploadThing Hook
+
+  // 使用 UploadThing Hook 上传文件到服务器做记录
   const { startUpload, isUploading } = useUploadThing("editorUploader", {
     onClientUploadComplete: (res) => {
       console.log("Upload completed:", res);
       toast.success("文件上传成功");
     },
     onUploadError: (error: Error) => {
+      console.error(error,'error------');
+      
       toast.error(`上传失败: ${error.message}`);
     },
   });
 
-  // 上传文件
+  // 处理文件选择并上传到 UploadThing
   const handleFileUpload = async (files: File[]) => {
     const newAttachments: FileAttachment[] = files.map((file) => ({
       file,
@@ -71,14 +73,14 @@ export function ChatInput({
     ]);
 
     try {
-      // 使用 UploadThing 上传
+      // 使用 UploadThing 上传文件到服务器做记录
       const uploadedFiles = await startUpload(files);
 
       if (!uploadedFiles) {
         throw new Error("上传失败");
       }
 
-      // 更新附件状态
+      // 更新附件状态，保存上传后的 URL
       setAttachments((prev) =>
         prev.map((att) => {
           const uploaded = uploadedFiles.find(
@@ -89,7 +91,8 @@ export function ChatInput({
             return {
               ...att,
               uploading: false,
-              url: uploaded.ufsUrl,
+              // 保存上传后的 URL 用于记录（优先使用 url，如果没有则使用 ufsUrl）
+              url: uploaded.url || (uploaded as any).ufsUrl,
             };
           }
           return att;

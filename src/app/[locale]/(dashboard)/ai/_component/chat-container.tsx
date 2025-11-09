@@ -221,9 +221,22 @@ export function ChatContainer() {
     const messageContent = input.trim();
     const currentAttachments = [...attachments];
 
-    const messageData = {
-      role: "user" as const,
+    const fileList = currentAttachments.length > 0
+      ? (() => {
+          const dataTransfer = new DataTransfer();
+          currentAttachments.forEach((att) => {
+            dataTransfer.items.add(att.file);
+          });
+          return dataTransfer.files;
+        })()
+      : undefined;
+
+    const messageData: {
+      text: string;
+      files?: FileList;
+    } = {
       text: messageContent,
+      ...(fileList && { files: fileList }),
     };
 
     // 首次对话

@@ -23,7 +23,7 @@ export function ButtonFileUpload({
     <FileUpload
       onFilesAdded={onFileUpload}
       multiple
-      accept=".txt,.md,image/jpeg,image/png,image/gif,image/webp,image/svg,image/heic,image/heif"
+      accept=".txt,.pdf,image/jpeg,image/png,image/gif,image/webp,image/svg,image/heic,image/heif"
     >
       <Tooltip>
         <TooltipTrigger asChild>

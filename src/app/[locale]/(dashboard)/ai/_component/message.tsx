@@ -52,6 +52,7 @@ function MessageInner({
         id={id}
         hasScrollAnchor={hasScrollAnchor}
         className={className}
+        parts={parts}
       >
         {children}
       </MessageUser>

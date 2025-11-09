@@ -9,9 +9,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useRef, useState } from "react"
-import { Check, Copy, Trash } from "lucide-react"
+import { Check, Copy, Pencil, Trash } from "lucide-react"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { useSession } from "@/lib/auth-client"
+import { FileDisplayItem } from "./file-display-item"
 
 export type MessageUserProps = {
   hasScrollAnchor?: boolean
@@ -23,6 +24,7 @@ export type MessageUserProps = {
   onDelete: (id: string) => void
   id: string
   className?: string
+  parts?: any[]
 }
 
 export function MessageUser({
@@ -35,12 +37,16 @@ export function MessageUser({
   onDelete,
   id,
   className,
+  parts,
 }: MessageUserProps) {
   const [editInput, setEditInput] = useState(children)
   const [isEditing, setIsEditing] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const { data } = useSession();
   const user = data?.user;
+  
+  // 过滤出文件类型的 parts
+  const fileParts = parts?.filter((part) => part.type === "file") || []
 
   const handleEditCancel = () => {
     setIsEditing(false)
@@ -68,6 +74,30 @@ export function MessageUser({
           className
         )}
       >
+        {fileParts.length > 0 && (
+          <div className="flex flex-wrap justify-end gap-2 mb-2 max-w-[70%]">
+            {fileParts.map((part, index) => {
+              // FileUIPart 可能的结构：
+              // - part.data (base64 data URL)
+              // - part.url
+              // - part.filename
+              // - part.name
+              // - part.mimeType
+              const fileUrl = part.data || part.url || ""
+              const fileName = part.filename || part.name
+              const fileMimeType = part.mimeType
+              
+              return (
+                <FileDisplayItem
+                  key={index}
+                  url={fileUrl}
+                  name={fileName}
+                  mimeType={fileMimeType}
+                />
+              )
+            })}
+          </div>
+        )}
 
         {isEditing ? (
           <div
@@ -125,7 +155,7 @@ export function MessageUser({
             </button>
           </MessageAction>
           {/* @todo: add when ready */}
-          {/* <MessageAction
+          <MessageAction
           tooltip={isEditing ? "Save" : "Edit"}
           side="bottom"
           delayDuration={0}
@@ -136,9 +166,9 @@ export function MessageUser({
             onClick={() => setIsEditing(!isEditing)}
             type="button"
           >
-            <PencilSimple className="size-4" />
+            <Pencil className="size-4" />
           </button>
-        </MessageAction> */}
+        </MessageAction>
           <MessageAction tooltip="Delete" side="bottom">
             <button
               className="hover:bg-accent/60 text-muted-foreground hover:text-foreground flex size-7.5 items-center justify-center rounded-full bg-transparent transition"
