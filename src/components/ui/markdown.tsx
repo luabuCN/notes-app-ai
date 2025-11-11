@@ -18,9 +18,12 @@ const VALID_HTML_TAGS = new Set([
  * This prevents React from trying to render invalid tags like <user> as HTML elements
  */
 function sanitizeHtml(content: string): string {
+  // Guard against undefined/null and non-string inputs
+  const input = typeof content === 'string' ? content : String(content ?? '')
+  if (input.length === 0) return ''
   // Match HTML tags (opening, closing, and self-closing)
   // Pattern matches: <tag>, </tag>, <tag/>, <tag attr="value">
-  return content.replace(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)(\s[^>]*?)?(\/?)>/g, (match, closingSlash, tagName, attributes, selfClosing) => {
+  return input.replace(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)(\s[^>]*?)?(\/?)>/g, (match, closingSlash, tagName, attributes, selfClosing) => {
     const lowerTagName = tagName.toLowerCase()
     // If it's a valid HTML tag, keep it as is
     if (VALID_HTML_TAGS.has(lowerTagName)) {

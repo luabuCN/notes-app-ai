@@ -5,9 +5,13 @@ import {
   MessageContent,
 } from "@/components/ui/message";
 import { cn } from "@/lib/utils";
-import { getSources } from "./get-sources";
-import { SourcesList } from "./sources-list";
 import { Check, Copy, RotateCw } from "lucide-react";
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ui/reasoning";
+import { useEffect } from "react";
 
 type MessageAssistantProps = {
   children: string;
@@ -32,10 +36,6 @@ export function MessageAssistant({
   status,
   className,
 }: MessageAssistantProps) {
-  const sources = getSources(parts || []);
-  const toolInvocationParts = parts?.filter(
-    (part) => part.type === "tool-invocation"
-  );
   const reasoningParts = parts?.find((part) => part.type === "reasoning");
   const textPart = parts?.find((part) => part.type === "text");
   const actualContent = textPart?.text || children;
@@ -50,20 +50,22 @@ export function MessageAssistant({
         className
       )}
     >
-     
-
       <div className={cn("flex min-w-full flex-col gap-2", isLast && "pb-8")}>
-        {reasoningParts && reasoningParts.reasoning && (
-          <div className="text-sm text-muted-foreground italic p-3 bg-muted/50 rounded-lg">
-            <strong>Reasoning:</strong> {reasoningParts.reasoning}
-          </div>
-        )}
-
-        {toolInvocationParts && toolInvocationParts.length > 0 && (
-          <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg">
-            <strong>Tool Usage:</strong> {toolInvocationParts.length} tool(s) invoked
-          </div>
-        )}
+        {reasoningParts?.text ? (
+          <Reasoning
+            isStreaming={status === "streaming"}
+          >
+            <ReasoningTrigger className="text-xs">
+              显示深度思考
+            </ReasoningTrigger>
+            <ReasoningContent
+              className="ml-2 border-l-2 border-l-slate-200 px-2 pb-1 dark:border-l-slate-700 mt-1"
+              markdown
+            >
+              {reasoningParts.text}
+            </ReasoningContent>
+          </Reasoning>
+        ) : null}
 
         {contentNullOrEmpty ? null : (
           <MessageContent
@@ -77,7 +79,6 @@ export function MessageAssistant({
           </MessageContent>
         )}
 
-        {sources && sources.length > 0 && <SourcesList sources={sources} />}
 
         {Boolean(isLastStreaming || contentNullOrEmpty) ? null : (
           <MessageActions

@@ -19,8 +19,9 @@ export async function POST(req: NextRequest) {
   // 获取用户的模型配置
   let model;
   if (session?.user?.id) {
-    const config = await prisma.aiModelConfig.findUnique({
-      where: { userId: session.user.id },
+    const config = await prisma.aiModelConfig.findFirst({
+      where: { userId: session.user.id, isActive: true },
+      orderBy: { updatedAt: "desc" },
     });
 
     if (config) {
@@ -76,6 +77,16 @@ export async function POST(req: NextRequest) {
     messages:convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {} as ToolSet,
+    providerOptions: {
+     google: {
+      thinkingConfig:{
+        thinkingBudget: 1024,
+        includeThoughts: true,
+      }
+     }
+    }
   });
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+  });
 }

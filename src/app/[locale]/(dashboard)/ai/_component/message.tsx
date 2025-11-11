@@ -80,6 +80,7 @@ export const Message = React.memo(MessageInner, (prev, next) => {
     prev.id === next.id &&
     prev.variant === next.variant &&
     prev.children === next.children &&
+    prev.parts === next.parts &&
     prev.status === next.status &&
     prev.isLast === next.isLast
   );

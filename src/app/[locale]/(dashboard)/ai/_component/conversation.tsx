@@ -7,7 +7,7 @@ import {
 import { Loader } from "@/components/ui/loader"
 import { ScrollButton } from "@/components/ui/scroll-button"
 import type { UIMessage } from "@ai-sdk/react"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Message } from "./message"
 
 type ConversationProps = {

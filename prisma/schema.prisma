@@ -25,7 +25,7 @@ model User {
   accounts         Account[]
   conversations    Conversation[]
   files            File[]
-  aiModelConfig    AiModelConfig?
+  aiModelConfigs   AiModelConfig[]
   @@map("user")
 }
 
@@ -113,14 +113,17 @@ model File {
 
 model AiModelConfig {
   id        String   @id @default(cuid())
-  userId    String   @unique
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   provider  String   // "gemini" | "deepseek" | "openrouter"
   apiKey    String
   modelName String
   baseURL   String?
+  isActive  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("ai_model_config")
+  @@index([userId])
+  @@unique([userId, provider, modelName])
 }

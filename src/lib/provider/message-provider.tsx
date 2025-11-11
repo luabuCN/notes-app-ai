@@ -41,6 +41,8 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     if(chatData?.messages) {
       setMessages(chatData.messages as unknown as UIMessage[])
     }
+    console.log(chatData,'chatData------');
+    
   }, [chatData])
 
 

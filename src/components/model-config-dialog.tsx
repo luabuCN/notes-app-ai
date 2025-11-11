@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useModelConfig } from "@/lib/provider/model-config-provider";
 import type { ModelProvider } from "@/lib/types/model-config";
 import { toast } from "sonner";
@@ -38,6 +40,17 @@ export function ModelConfigDialog({
   const [modelName, setModelName] = useState("");
   const [baseURL, setBaseURL] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [activate, setActivate] = useState(true);
+  const { data: providerConfig, isFetching: providerFetching } = useQuery({
+    queryKey: ["model-config", "provider", provider, open],
+    enabled: !!open,
+    queryFn: async () => {
+      const resp = await fetch(`/api/ai/model-config?provider=${encodeURIComponent(provider)}`);
+      if (resp.ok) return resp.json();
+      if (resp.status === 404) return null;
+      throw new Error("Failed to fetch provider config");
+    },
+  });
 
   // 加载已保存的配置
   useEffect(() => {
@@ -47,12 +60,14 @@ export function ModelConfigDialog({
         setApiKey(config.apiKey);
         setModelName(config.modelName);
         setBaseURL(config.baseURL || "");
+        setActivate(true);
       } else {
         // 设置默认值
         setProvider("deepseek");
         setApiKey("");
         setModelName("");
         setBaseURL("");
+        setActivate(true);
       }
     }
   }, [open, config]);
@@ -74,6 +89,7 @@ export function ModelConfigDialog({
         apiKey: apiKey.trim(),
         modelName: modelName.trim(),
         baseURL: baseURL.trim() || undefined,
+        activate: activate === true,
       });
       toast.success("模型配置已保存");
       onOpenChange(false);
@@ -109,6 +125,21 @@ export function ModelConfigDialog({
     }
   };
 
+  // 当 provider 查询结果返回后回显
+  useEffect(() => {
+    if (!open) return;
+    if (providerFetching) return;
+    if (providerConfig) {
+      setApiKey(providerConfig.apiKey || "");
+      setModelName(providerConfig.modelName || getDefaultModelName(provider));
+      setBaseURL(providerConfig.baseURL || "");
+    } else if (providerConfig === null) {
+      setApiKey("");
+      setModelName(getDefaultModelName(provider));
+      setBaseURL("");
+    }
+  }, [providerConfig, providerFetching, open, provider]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -121,8 +152,10 @@ export function ModelConfigDialog({
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="provider">供应商</Label>
-            <Select value={provider} onValueChange={handleProviderChange}>
+            <Label htmlFor="provider">
+              供应商 {providerFetching ? <span className="text-xs text-muted-foreground">（加载中...）</span> : null}
+            </Label>
+            <Select value={provider} onValueChange={handleProviderChange} disabled={configLoading || isSaving || providerFetching}>
               <SelectTrigger id="provider" className="w-full">
                 <SelectValue placeholder="选择供应商" />
               </SelectTrigger>
@@ -145,7 +178,7 @@ export function ModelConfigDialog({
               placeholder="请输入 API Key"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              disabled={configLoading || isSaving}
+              disabled={configLoading || isSaving || providerFetching}
             />
           </div>
 
@@ -158,7 +191,7 @@ export function ModelConfigDialog({
               placeholder={`例如: ${getDefaultModelName(provider)}`}
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
-              disabled={configLoading || isSaving}
+              disabled={configLoading || isSaving || providerFetching}
             />
           </div>
 
@@ -169,11 +202,23 @@ export function ModelConfigDialog({
               placeholder="留空使用默认地址"
               value={baseURL}
               onChange={(e) => setBaseURL(e.target.value)}
-              disabled={configLoading || isSaving}
+              disabled={configLoading || isSaving || providerFetching}
             />
             <p className="text-xs text-muted-foreground">
               如果不填写，将使用供应商的默认 API 地址
             </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="activate"
+              checked={activate}
+              onCheckedChange={(v) => setActivate(!!v)}
+              disabled={configLoading || isSaving || providerFetching}
+            />
+            <Label htmlFor="activate" className="cursor-pointer">
+              保存后设为当前激活
+            </Label>
           </div>
         </div>
 
