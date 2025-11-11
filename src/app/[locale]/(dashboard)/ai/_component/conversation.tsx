@@ -22,7 +22,6 @@ export function Conversation({
   messages,
   status = "ready",
   onDelete,
-  onEdit,
   onregenerate,
 }: ConversationProps) {
   const initialMessageCount = useRef(messages.length)
@@ -54,7 +53,6 @@ export function Conversation({
                 variant={message.role}
                 isLast={isLast}
                 onDelete={onDelete}
-                onEdit={onEdit}
                 onReload={onregenerate}
                 hasScrollAnchor={hasScrollAnchor}
                 parts={message.parts}

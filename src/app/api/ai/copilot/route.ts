@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
   try {
     const result = await generateText({
       abortSignal: req.signal,
-      maxTokens: 50,
       model: openai(model),
       prompt: prompt,
       system,

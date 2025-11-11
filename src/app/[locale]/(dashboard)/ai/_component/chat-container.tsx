@@ -12,6 +12,7 @@ import { useChatSession } from "@/lib/provider/chat-session-provider";
 import { useSearchParams } from "next/navigation";
 import { saveMessages } from "../_action/use-save-message";
 import { createChat } from "../_action/use-create-chat";
+import { deleteMessage } from "../_action/use-delete-message";
 import { DefaultChatTransport } from "ai";
 import { useSession } from "@/lib/auth-client";
 import { FileAttachment } from "./types";
@@ -182,12 +183,49 @@ export function ChatContainer() {
     hasProcessedFirstMessage.current = false;
   }, [chatId]);
 
+  // 删除消息 mutation
+  const deleteMessageMutation = useMutation({
+    mutationFn: (messageId: string) => deleteMessage(messageId),
+    onMutate: () => {
+      const toastId = toast.loading("正在删除消息...");
+      return { toastId };
+    },
+    onSuccess: (_, messageId, context) => {
+      // 关闭loading提示
+      if (context?.toastId) {
+        toast.dismiss(context.toastId);
+      }
+      // 更新本地状态
+      setMessages(messages.filter((message) => message.id !== messageId));
+      // 更新查询缓存
+      if (chatId) {
+        queryClient.invalidateQueries({
+          queryKey: ["chat-messages", chatId],
+          exact: true,
+        });
+      }
+      toast.success("消息已删除");
+    },
+    onError: (error: any, _, context) => {
+      // 关闭loading提示
+      if (context?.toastId) {
+        toast.dismiss(context.toastId);
+      }
+      console.error("删除消息失败", error);
+      toast.error(error?.message || "删除消息失败");
+    },
+  });
+
   // 删除消息
   const handleDelete = useCallback(
     (id: string) => {
-      setMessages(messages.filter((message) => message.id !== id));
+      if (!chatId) {
+        setMessages(messages.filter((message) => message.id !== id));
+        return;
+      }
+      deleteMessageMutation.mutate(id);
     },
-    [messages, setMessages]
+    [messages, setMessages, chatId, deleteMessageMutation]
   );
 
   // 编辑消息

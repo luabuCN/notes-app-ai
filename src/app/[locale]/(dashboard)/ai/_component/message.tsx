@@ -11,7 +11,6 @@ type MessageProps = {
   id: string;
   isLast?: boolean;
   onDelete: (id: string) => void;
-  onEdit: (id: string, newText: string) => void;
   onReload: () => void;
   hasScrollAnchor?: boolean;
   parts?: any[];
@@ -25,7 +24,6 @@ function MessageInner({
   id,
   isLast,
   onDelete,
-  onEdit,
   onReload,
   hasScrollAnchor,
   parts,
@@ -46,8 +44,6 @@ function MessageInner({
       <MessageUser
         copied={copied}
         copyToClipboard={copyToClipboard}
-        onReload={onReload}
-        onEdit={onEdit}
         onDelete={onDelete}
         id={id}
         hasScrollAnchor={hasScrollAnchor}
