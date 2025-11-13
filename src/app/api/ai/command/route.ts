@@ -4,7 +4,6 @@ import type {
 } from '@/components/editor/use-chat';
 import type { NextRequest } from 'next/server';
 
-import { createGateway } from '@ai-sdk/gateway';
 import {
   type LanguageModel,
   type UIMessageStreamWriter,
@@ -21,6 +20,7 @@ import { z } from 'zod';
 
 import { BaseEditorKit } from '@/components/editor/editor-base-kit';
 import { markdownJoinerTransform } from '@/lib/markdown-joiner-transform';
+import { resolveUserConfiguredModel } from '@/lib/ai/user-model';
 
 import {
   getChooseToolPrompt,
@@ -31,10 +31,8 @@ import {
 
 export async function POST(req: NextRequest) {
   const {
-    apiKey: key,
     ctx,
     messages: messagesRaw = [],
-    model,
   } = await req.json();
 
   const { children, selection, toolName: toolNameParam } = ctx;
@@ -45,20 +43,15 @@ export async function POST(req: NextRequest) {
     value: children,
   });
 
-  const apiKey = key || process.env.AI_GATEWAY_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'Missing AI Gateway API key.' },
-      { status: 401 }
-    );
-  }
-
   const isSelecting = editor.api.isExpanded();
 
-  const gatewayProvider = createGateway({
-    apiKey,
-  });
+  const { model: userModel, errorResponse } = await resolveUserConfiguredModel(
+    req
+  );
+
+  if (!userModel || errorResponse) {
+    return errorResponse;
+  }
 
   try {
     const stream = createUIMessageStream<ChatMessage>({
@@ -70,7 +63,7 @@ export async function POST(req: NextRequest) {
             enum: isSelecting
               ? ['generate', 'edit', 'comment']
               : ['generate', 'comment'],
-            model: gatewayProvider(model || 'google/gemini-2.5-flash'),
+            model: userModel,
             output: 'enum',
             prompt: getChooseToolPrompt(messagesRaw),
           });
@@ -85,13 +78,13 @@ export async function POST(req: NextRequest) {
 
         const stream = streamText({
           experimental_transform: markdownJoinerTransform(),
-          model: gatewayProvider(model || 'openai/gpt-4o-mini'),
+          model: userModel,
           // Not used
           prompt: '',
           tools: {
             comment: getCommentTool(editor, {
               messagesRaw,
-              model: gatewayProvider(model || 'google/gemini-2.5-flash'),
+              model: userModel,
               writer,
             }),
           },
@@ -135,7 +128,7 @@ export async function POST(req: NextRequest) {
                     role: 'user',
                   },
                 ],
-                model: gatewayProvider(model || 'openai/gpt-4o-mini'),
+                model: userModel,
               };
             }
           },

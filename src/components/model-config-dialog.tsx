@@ -133,10 +133,12 @@ export function ModelConfigDialog({
       setApiKey(providerConfig.apiKey || "");
       setModelName(providerConfig.modelName || getDefaultModelName(provider));
       setBaseURL(providerConfig.baseURL || "");
+      setActivate(providerConfig.isActive ?? false);
     } else if (providerConfig === null) {
       setApiKey("");
       setModelName(getDefaultModelName(provider));
       setBaseURL("");
+      setActivate(true);
     }
   }, [providerConfig, providerFetching, open, provider]);
 

@@ -125,5 +125,5 @@ model AiModelConfig {
 
   @@map("ai_model_config")
   @@index([userId])
-  @@unique([userId, provider, modelName])
+  @@unique([userId, provider])
 }

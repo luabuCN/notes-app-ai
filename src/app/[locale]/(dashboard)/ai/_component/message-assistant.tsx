@@ -55,11 +55,11 @@ export function MessageAssistant({
           <Reasoning
             isStreaming={status === "streaming"}
           >
-            <ReasoningTrigger className="text-xs">
+            <ReasoningTrigger className="text-xs mb-1">
               显示深度思考
             </ReasoningTrigger>
             <ReasoningContent
-              className="ml-2 border-l-2 border-l-slate-200 px-2 pb-1 dark:border-l-slate-700 mt-1"
+              className="ml-2 border-l-2 border-l-slate-200 px-2  dark:border-l-slate-700"
               markdown
             >
               {reasoningParts.text}

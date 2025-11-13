@@ -1,75 +1,61 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createDeepSeek } from '@ai-sdk/deepseek';
-import {  streamText, type ToolSet ,convertToModelMessages, stepCountIs, type UIMessage} from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/db";
+import {  streamText, type ToolSet ,convertToModelMessages, stepCountIs, type UIMessage, type TextStreamPart} from "ai";
 import type { NextRequest } from "next/server";
 
+import { resolveUserConfiguredModel } from "@/lib/ai/user-model";
+
 export const maxDuration = 30;
+
+/**
+ * 固定字符数分块的流式输出转换
+ * @param chunkSize 每个chunk的字符数，默认10
+ * @param delayInMs 块之间的延迟毫秒数，默认10
+ */
+function createSmoothStream(chunkSize: number = 1, delayInMs: number = 10) {
+  return () => {
+    let buffer = '';
+    let lastId = 'stream';
+
+    return new TransformStream<TextStreamPart<ToolSet>, TextStreamPart<ToolSet>>({
+      async transform(chunk, controller) {
+        if (chunk.type !== 'text-delta') {
+          if (buffer.length > 0) {
+            controller.enqueue({ text: buffer, type: 'text-delta', id: lastId });
+            buffer = '';
+          }
+          controller.enqueue(chunk);
+          return;
+        }
+
+        lastId = chunk.id ?? lastId;
+        buffer += chunk.text;
+
+        while (buffer.length >= chunkSize) {
+          const chunkText = buffer.slice(0, chunkSize);
+          controller.enqueue({ text: chunkText, type: 'text-delta', id: lastId });
+          buffer = buffer.slice(chunkSize);
+          if (delayInMs != null && delayInMs > 0) {
+            await new Promise((r) => setTimeout(r, delayInMs));
+          }
+        }
+      },
+      flush(controller) {
+        if (buffer.length > 0) {
+          controller.enqueue({ text: buffer, type: 'text-delta', id: lastId });
+          buffer = '';
+        }
+      },
+    });
+  };
+}
 
 export async function POST(req: NextRequest) {
   const { messages }: { messages: UIMessage[] } = await req.json();
   console.log(messages,'messages------');
   
-  // 获取用户会话
-  const session = await auth.api.getSession({ headers: req.headers });
-  
-  // 获取用户的模型配置
-  let model;
-  if (session?.user?.id) {
-    const config = await prisma.aiModelConfig.findFirst({
-      where: { userId: session.user.id, isActive: true },
-      orderBy: { updatedAt: "desc" },
-    });
+  const { model, errorResponse } = await resolveUserConfiguredModel(req);
 
-    if (config) {
-      const { provider, apiKey, modelName, baseURL } = config;
-      
-      switch (provider) {
-        case "openai": {
-          const openai = createOpenAI({
-            apiKey,
-            ...(baseURL ? { baseURL } : {}),
-          });
-          model = openai(modelName);
-          break;
-        }
-        case "gemini": {
-          const google = createGoogleGenerativeAI({
-            apiKey,
-            ...(baseURL ? { baseURL } : {}),
-          });
-          model = google(modelName);
-          break;
-        }
-        case "deepseek": {
-          const deepseek = createDeepSeek({
-            apiKey,
-            ...(baseURL ? { baseURL } : {}),
-          });
-          model = deepseek(modelName);
-          break;
-        }
-        case "openrouter": {
-          const openrouter = createOpenRouter({
-            apiKey,
-            ...(baseURL ? { baseURL } : {}),
-          });
-          model = openrouter(modelName);
-          break;
-        }
-      }
-    }
-  }
-
-  // 如果没有配置，使用默认的 DeepSeek
-  if (!model) {
-    const deepseek = createDeepSeek({
-      apiKey: "sk-18c1c0a82f1b44b4936e7e0b0da2ae08",
-    });
-    model = deepseek("deepseek-chat");
+  if (!model || errorResponse) {
+    return errorResponse;
   }
 
   const result = streamText({
@@ -77,16 +63,7 @@ export async function POST(req: NextRequest) {
     messages:convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {} as ToolSet,
-    providerOptions: {
-     google: {
-      thinkingConfig:{
-        thinkingBudget: 1024,
-        includeThoughts: true,
-      }
-     }
-    }
+    experimental_transform: createSmoothStream(10, 10),
   });
-  return result.toUIMessageStreamResponse({
-    sendReasoning: true,
-  });
+  return result.toUIMessageStreamResponse();
 }

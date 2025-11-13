@@ -107,11 +107,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 同一用户下每个供应商仅保留一条配置
+    const existingByProvider = await prisma.aiModelConfig.findFirst({
+      where: { userId: session.user.id, provider },
+    });
+
+    // 兼容性：若请求携带 id，则确保该记录属于当前用户
+    const existingById = id
+      ? await prisma.aiModelConfig.findFirst({
+          where: { id, userId: session.user.id },
+        })
+      : null;
+
     let config;
-    if (id) {
-      // 按 id 更新
+    if (existingByProvider) {
       config = await prisma.aiModelConfig.update({
-        where: { id },
+        where: { id: existingByProvider.id },
+        data: {
+          apiKey,
+          modelName,
+          baseURL: baseURL || null,
+        },
+      });
+    } else if (existingById) {
+      config = await prisma.aiModelConfig.update({
+        where: { id: existingById.id },
         data: {
           provider,
           apiKey,
@@ -120,29 +140,15 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      // 查找是否已有相同 provider+modelName 的记录
-      const existing = await prisma.aiModelConfig.findFirst({
-        where: { userId: session.user.id, provider, modelName },
+      config = await prisma.aiModelConfig.create({
+        data: {
+          userId: session.user.id,
+          provider,
+          apiKey,
+          modelName,
+          baseURL: baseURL || null,
+        },
       });
-      if (existing) {
-        config = await prisma.aiModelConfig.update({
-          where: { id: existing.id },
-          data: {
-            apiKey,
-            baseURL: baseURL || null,
-          },
-        });
-      } else {
-        config = await prisma.aiModelConfig.create({
-          data: {
-            userId: session.user.id,
-            provider,
-            apiKey,
-            modelName,
-            baseURL: baseURL || null,
-          },
-        });
-      }
     }
 
     // 激活逻辑：若 activate 为真，则将该用户其他配置置为未激活，当前置为激活
