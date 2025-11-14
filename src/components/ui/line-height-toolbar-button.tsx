@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -30,11 +31,12 @@ export function LineHeightToolbarButton(props: DropdownMenuProps) {
   });
 
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations('editor');
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Line height" isDropdown>
+        <ToolbarButton pressed={open} tooltip={t('toolbar.lineHeight')} isDropdown>
           <WrapText />
         </ToolbarButton>
       </DropdownMenuTrigger>

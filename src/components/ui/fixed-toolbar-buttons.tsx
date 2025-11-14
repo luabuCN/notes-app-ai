@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   ArrowUpToLineIcon,
@@ -49,6 +50,7 @@ import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
+  const t = useTranslations('editor');
 
   return (
     <div className="flex w-full">
@@ -60,7 +62,7 @@ export function FixedToolbarButtons() {
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands">
+            <AIToolbarButton tooltip={t('toolbar.aiCommands')}>
               <WandSparklesIcon />
             </AIToolbarButton>
           </ToolbarGroup>
@@ -80,39 +82,39 @@ export function FixedToolbarButtons() {
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
+            <MarkToolbarButton nodeType={KEYS.bold} tooltip={t('toolbar.bold')}>
               <BoldIcon />
             </MarkToolbarButton>
 
-            <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
+            <MarkToolbarButton nodeType={KEYS.italic} tooltip={t('toolbar.italic')}>
               <ItalicIcon />
             </MarkToolbarButton>
 
             <MarkToolbarButton
               nodeType={KEYS.underline}
-              tooltip="Underline (⌘+U)"
+              tooltip={t('toolbar.underline')}
             >
               <UnderlineIcon />
             </MarkToolbarButton>
 
             <MarkToolbarButton
               nodeType={KEYS.strikethrough}
-              tooltip="Strikethrough (⌘+⇧+M)"
+              tooltip={t('toolbar.strikethrough')}
             >
               <StrikethroughIcon />
             </MarkToolbarButton>
 
-            <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
+            <MarkToolbarButton nodeType={KEYS.code} tooltip={t('toolbar.code')}>
               <Code2Icon />
             </MarkToolbarButton>
 
-            <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+            <FontColorToolbarButton nodeType={KEYS.color} tooltip={t('toolbar.textColor')}>
               <BaselineIcon />
             </FontColorToolbarButton>
 
             <FontColorToolbarButton
               nodeType={KEYS.backgroundColor}
-              tooltip="Background color"
+              tooltip={t('toolbar.bgColor')}
             >
               <PaintBucketIcon />
             </FontColorToolbarButton>
@@ -130,7 +132,7 @@ export function FixedToolbarButtons() {
           <ToolbarGroup>
             <LinkToolbarButton />
             <TableToolbarButton />
-            <EmojiToolbarButton />
+            <EmojiToolbarButton tooltip={t('toolbar.emoji')} />
           </ToolbarGroup>
 
           <ToolbarGroup>
@@ -155,7 +157,7 @@ export function FixedToolbarButtons() {
       <div className="grow" />
 
       <ToolbarGroup>
-        <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
+        <MarkToolbarButton nodeType={KEYS.highlight} tooltip={t('toolbar.highlight')}>
           <HighlighterIcon />
         </MarkToolbarButton>
         <CommentToolbarButton />

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { Alignment } from '@platejs/basic-styles';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
@@ -54,11 +55,12 @@ export function AlignToolbarButton(props: DropdownMenuProps) {
   const [open, setOpen] = React.useState(false);
   const IconValue =
     items.find((item) => item.value === value)?.icon ?? AlignLeftIcon;
+  const t = useTranslations('editor');
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Align" isDropdown>
+        <ToolbarButton pressed={open} tooltip={t('toolbar.align')} isDropdown>
           <IconValue />
         </ToolbarButton>
       </DropdownMenuTrigger>

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { useIndentButton, useOutdentButton } from '@platejs/indent/react';
 import { IndentIcon, OutdentIcon } from 'lucide-react';
@@ -11,9 +12,10 @@ export function IndentToolbarButton(
   props: React.ComponentProps<typeof ToolbarButton>
 ) {
   const { props: buttonProps } = useIndentButton();
+  const t = useTranslations('editor');
 
   return (
-    <ToolbarButton {...props} {...buttonProps} tooltip="Indent">
+    <ToolbarButton {...props} {...buttonProps} tooltip={t('toolbar.indent')}>
       <IndentIcon />
     </ToolbarButton>
   );
@@ -23,9 +25,10 @@ export function OutdentToolbarButton(
   props: React.ComponentProps<typeof ToolbarButton>
 ) {
   const { props: buttonProps } = useOutdentButton();
+  const t = useTranslations('editor');
 
   return (
-    <ToolbarButton {...props} {...buttonProps} tooltip="Outdent">
+    <ToolbarButton {...props} {...buttonProps} tooltip={t('toolbar.outdent')}>
       <OutdentIcon />
     </ToolbarButton>
   );

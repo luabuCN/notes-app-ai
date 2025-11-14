@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { WithRequiredKey } from 'platejs';
 
@@ -87,7 +88,7 @@ export function MediaToolbar({
 
               <FloatingMediaPrimitive.UrlInput
                 className={inputVariants()}
-                placeholder="Paste the embed link..."
+                placeholder={useTranslations('editor')('placeholders.pasteEmbedLink')}
                 options={{ plugin }}
               />
             </div>
@@ -97,11 +98,11 @@ export function MediaToolbar({
             <FloatingMediaPrimitive.EditButton
               className={buttonVariants({ size: 'sm', variant: 'ghost' })}
             >
-              Edit link
+              {useTranslations('editor')('media.editLink')}
             </FloatingMediaPrimitive.EditButton>
 
             <CaptionButton size="sm" variant="ghost">
-              Caption
+              {useTranslations('editor')('media.caption')}
             </CaptionButton>
 
             <Separator orientation="vertical" className="mx-1 h-6" />

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { MessageSquareTextIcon } from 'lucide-react';
 import { useEditorRef } from 'platejs/react';
@@ -11,6 +12,7 @@ import { ToolbarButton } from './toolbar';
 
 export function CommentToolbarButton() {
   const editor = useEditorRef();
+  const t = useTranslations('editor');
 
   return (
     <ToolbarButton
@@ -18,7 +20,7 @@ export function CommentToolbarButton() {
         editor.getTransforms(commentPlugin).comment.setDraft();
       }}
       data-plate-prevent-overlay
-      tooltip="Comment"
+      tooltip={t('toolbar.comment')}
     >
       <MessageSquareTextIcon />
     </ToolbarButton>

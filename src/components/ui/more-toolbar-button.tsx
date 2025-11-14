@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -26,11 +27,12 @@ import { ToolbarButton } from './toolbar';
 export function MoreToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations('editor');
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Insert">
+        <ToolbarButton pressed={open} tooltip={t('toolbar.insert')}>
           <MoreHorizontalIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
@@ -48,7 +50,7 @@ export function MoreToolbarButton(props: DropdownMenuProps) {
             }}
           >
             <KeyboardIcon />
-            Keyboard input
+            {t('insert.items.kbd', { default: 'Keyboard input' })}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -60,7 +62,7 @@ export function MoreToolbarButton(props: DropdownMenuProps) {
             }}
           >
             <SuperscriptIcon />
-            Superscript
+            {t('insert.items.superscript', { default: 'Superscript' })}
             {/* (⌘+,) */}
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -72,7 +74,7 @@ export function MoreToolbarButton(props: DropdownMenuProps) {
             }}
           >
             <SubscriptIcon />
-            Subscript
+            {t('insert.items.subscript', { default: 'Subscript' })}
             {/* (⌘+.) */}
           </DropdownMenuItem>
         </DropdownMenuGroup>

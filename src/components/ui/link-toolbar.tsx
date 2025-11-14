@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { TLinkElement } from 'platejs';
 
@@ -96,6 +97,7 @@ export function LinkFloatingToolbar({
   });
 
   if (hidden) return null;
+  const t = useTranslations('editor');
 
   const input = (
     <div className="flex w-[330px] flex-col" {...inputProps}>
@@ -106,7 +108,7 @@ export function LinkFloatingToolbar({
 
         <FloatingLinkUrlInput
           className={inputVariants()}
-          placeholder="Paste link"
+          placeholder={t('placeholders.pasteLink')}
           data-plate-focus
         />
       </div>
@@ -117,7 +119,7 @@ export function LinkFloatingToolbar({
         </div>
         <input
           className={inputVariants()}
-          placeholder="Text to display"
+          placeholder={t('placeholders.textToDisplay')}
           data-plate-focus
           {...textInputProps}
         />
@@ -134,7 +136,7 @@ export function LinkFloatingToolbar({
         type="button"
         {...editButtonProps}
       >
-        Edit link
+        {t('media.editLink')}
       </button>
 
       <Separator orientation="vertical" />
@@ -172,7 +174,7 @@ export function LinkFloatingToolbar({
 function LinkOpenButton() {
   const editor = useEditorRef();
   const selection = useEditorSelection();
-
+const t = useTranslations('editor');
   const attributes = React.useMemo(
     () => {
       const entry = editor.api.node<TLinkElement>({
@@ -198,7 +200,7 @@ function LinkOpenButton() {
       onMouseOver={(e) => {
         e.stopPropagation();
       }}
-      aria-label="Open link in a new tab"
+      aria-label={t('placeholders.openLinkNewTab')}
       target="_blank"
     >
       <ExternalLink width={18} />

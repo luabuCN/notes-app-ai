@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { CreatePlateEditorOptions } from 'platejs/react';
 
@@ -565,19 +566,19 @@ export function CommentCreateForm({
           editor={commentEditor}
         >
           <EditorContainer variant="comment">
-            <Editor
-              variant="comment"
-              className="min-h-[25px] grow pt-0.5 pr-8"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  onAddComment();
-                }
-              }}
-              placeholder="Reply..."
-              autoComplete="off"
-              autoFocus={autoFocus}
-            />
+          <Editor
+            variant="comment"
+            className="min-h-[25px] grow pt-0.5 pr-8"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                onAddComment();
+              }
+            }}
+            placeholder={useTranslations('editor')('placeholders.reply')}
+            autoComplete="off"
+            autoFocus={autoFocus}
+          />
 
             <Button
               size="icon"

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   useLinkToolbarButton,
@@ -15,9 +16,10 @@ export function LinkToolbarButton(
 ) {
   const state = useLinkToolbarButtonState();
   const { props: buttonProps } = useLinkToolbarButton(state);
+  const t = useTranslations('editor');
 
   return (
-    <ToolbarButton {...props} {...buttonProps} data-plate-focus tooltip="Link">
+    <ToolbarButton {...props} {...buttonProps} data-plate-focus tooltip={t('toolbar.link')}>
       <Link />
     </ToolbarButton>
   );

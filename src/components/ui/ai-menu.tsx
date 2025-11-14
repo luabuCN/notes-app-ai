@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   AIChatPlugin,
@@ -205,7 +206,9 @@ export function AIMenu() {
           {isLoading ? (
             <div className="flex grow items-center gap-2 p-2 text-sm text-muted-foreground select-none">
               <Loader2Icon className="size-4 animate-spin" />
-              {messages.length > 1 ? 'Editing...' : 'Thinking...'}
+              {messages.length > 1
+                ? useTranslations('editor')('aiStatus.editing')
+                : useTranslations('editor')('aiStatus.thinking')}
             </div>
           ) : (
             <CommandPrimitive.Input
@@ -227,7 +230,7 @@ export function AIMenu() {
                 }
               }}
               onValueChange={setInput}
-              placeholder="Ask AI anything..."
+              placeholder={useTranslations('ai')('inputPlaceholder')}
               data-plate-focus
               autoFocus
             />
@@ -277,7 +280,7 @@ const AICommentIcon = () => (
 const aiChatItems = {
   accept: {
     icon: <Check />,
-    label: 'Accept',
+    label: 'editor.aiMenu.accept',
     value: 'accept',
     onSelect: ({ aiEditor, editor }) => {
       const { mode, toolName } = editor.getOptions(AIChatPlugin);
@@ -294,7 +297,7 @@ const aiChatItems = {
   },
   comment: {
     icon: <AICommentIcon />,
-    label: 'Comment',
+    label: 'editor.aiMenu.comment',
     value: 'comment',
     onSelect: ({ editor, input }) => {
       editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -307,7 +310,7 @@ const aiChatItems = {
   },
   continueWrite: {
     icon: <PenLine />,
-    label: 'Continue writing',
+    label: 'editor.aiMenu.continueWrite',
     value: 'continueWrite',
     onSelect: ({ editor, input }) => {
       const ancestorNode = editor.api.block({ highest: true });
@@ -330,7 +333,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   discard: {
     icon: <X />,
-    label: 'Discard',
+    label: 'editor.aiMenu.discard',
     shortcut: 'Escape',
     value: 'discard',
     onSelect: ({ editor, input }) => {
@@ -340,7 +343,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   emojify: {
     icon: <SmileIcon />,
-    label: 'Emojify',
+    label: 'editor.aiMenu.emojify',
     value: 'emojify',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -351,7 +354,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   explain: {
     icon: <BadgeHelp />,
-    label: 'Explain',
+    label: 'editor.aiMenu.explain',
     value: 'explain',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -365,7 +368,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   fixSpelling: {
     icon: <Check />,
-    label: 'Fix spelling & grammar',
+    label: 'editor.aiMenu.fixSpelling',
     value: 'fixSpelling',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -376,7 +379,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   generateMarkdownSample: {
     icon: <BookOpenCheck />,
-    label: 'Generate Markdown sample',
+    label: 'editor.aiMenu.generateMarkdownSample',
     value: 'generateMarkdownSample',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -387,7 +390,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   generateMdxSample: {
     icon: <BookOpenCheck />,
-    label: 'Generate MDX sample',
+    label: 'editor.aiMenu.generateMdxSample',
     value: 'generateMdxSample',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -398,7 +401,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   improveWriting: {
     icon: <Wand />,
-    label: 'Improve writing',
+    label: 'editor.aiMenu.improveWriting',
     value: 'improveWriting',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -409,7 +412,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   insertBelow: {
     icon: <ListEnd />,
-    label: 'Insert below',
+    label: 'editor.aiMenu.insertBelow',
     value: 'insertBelow',
     onSelect: ({ aiEditor, editor }) => {
       /** Format: 'none' Fix insert table */
@@ -420,7 +423,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   makeLonger: {
     icon: <ListPlus />,
-    label: 'Make longer',
+    label: 'editor.aiMenu.makeLonger',
     value: 'makeLonger',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -431,7 +434,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   makeShorter: {
     icon: <ListMinus />,
-    label: 'Make shorter',
+    label: 'editor.aiMenu.makeShorter',
     value: 'makeShorter',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -442,7 +445,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   replace: {
     icon: <Check />,
-    label: 'Replace selection',
+    label: 'editor.aiMenu.replace',
     value: 'replace',
     onSelect: ({ aiEditor, editor }) => {
       void editor.getTransforms(AIChatPlugin).aiChat.replaceSelection(aiEditor);
@@ -450,7 +453,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   simplifyLanguage: {
     icon: <FeatherIcon />,
-    label: 'Simplify language',
+    label: 'editor.aiMenu.simplifyLanguage',
     value: 'simplifyLanguage',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -461,7 +464,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   summarize: {
     icon: <Album />,
-    label: 'Add a summary',
+    label: 'editor.aiMenu.summarize',
     value: 'summarize',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit(input, {
@@ -476,7 +479,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
   },
   tryAgain: {
     icon: <CornerUpLeft />,
-    label: 'Try again',
+    label: 'editor.aiMenu.tryAgain',
     value: 'tryAgain',
     onSelect: ({ editor, input }) => {
       void editor.getApi(AIChatPlugin).aiChat.reload();
@@ -566,6 +569,7 @@ export const AIMenuItems = ({
   const { messages } = usePluginOption(AIChatPlugin, 'chat');
   const aiEditor = usePluginOption(AIChatPlugin, 'aiEditor')!;
   const isSelecting = useIsSelecting();
+  const t = useTranslations('editor');
 
   const menuState = React.useMemo(() => {
     if (messages && messages.length > 0) {
@@ -606,7 +610,7 @@ export const AIMenuItems = ({
               }}
             >
               {menuItem.icon}
-              <span>{menuItem.label}</span>
+              <span>{t(`aiMenu.${menuItem.value}`)}</span>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -617,6 +621,7 @@ export const AIMenuItems = ({
 
 export function AILoadingBar() {
   const editor = useEditorRef();
+  const t = useTranslations('editor');
 
   const toolName = usePluginOption(AIChatPlugin, 'toolName');
   const chat = usePluginOption(AIChatPlugin, 'chat');
@@ -665,7 +670,7 @@ export function AILoadingBar() {
         )}
       >
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-        <span>{status === 'submitted' ? 'Thinking...' : 'Writing...'}</span>
+        <span>{status === 'submitted' ? t('aiStatus.thinking') : t('aiStatus.writing')}</span>
         <Button
           size="sm"
           variant="ghost"
@@ -673,7 +678,7 @@ export function AILoadingBar() {
           onClick={() => api.aiChat.stop()}
         >
           <PauseIcon className="h-4 w-4" />
-          Stop
+          {t('aiStatus.stop')}
           <kbd className="ml-1 rounded bg-border px-1 font-mono text-[10px] text-muted-foreground shadow-sm">
             Esc
           </kbd>
@@ -698,7 +703,7 @@ export function AILoadingBar() {
               disabled={isLoading}
               onClick={() => handleComments('accept')}
             >
-              Accept
+              {t('aiStatus.accept')}
             </Button>
 
             <Button
@@ -706,7 +711,7 @@ export function AILoadingBar() {
               disabled={isLoading}
               onClick={() => handleComments('reject')}
             >
-              Reject
+              {t('aiStatus.reject')}
             </Button>
           </div>
         </div>

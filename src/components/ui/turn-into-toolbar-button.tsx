@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import type { TElement } from 'platejs';
@@ -146,7 +147,7 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
         <ToolbarButton
           className="min-w-[125px]"
           pressed={open}
-          tooltip="Turn into"
+          tooltip={useTranslations('editor')('toolbar.turnInto')}
           isDropdown
         >
           {selectedItem.label}
@@ -166,7 +167,7 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
           onValueChange={(type) => {
             setBlockType(editor, type);
           }}
-          label="Turn into"
+          label={useTranslations('editor')('toolbar.turnInto')}
         >
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
             <DropdownMenuRadioItem

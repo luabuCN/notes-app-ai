@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 
@@ -163,6 +164,7 @@ function TableFloatingToolbar({
   const isFocusedLast = useFocusedLast();
 
   const { canMerge, canSplit } = useTableMergeState();
+  const t = useTranslations('editor');
 
   return (
     <Popover
@@ -181,14 +183,14 @@ function TableFloatingToolbar({
           contentEditable={false}
         >
           <ToolbarGroup>
-            <ColorDropdownMenu tooltip="Background color">
+            <ColorDropdownMenu tooltip={t('table.bgColor')}>
               <PaintBucketIcon />
             </ColorDropdownMenu>
             {canMerge && (
               <ToolbarButton
                 onClick={() => tf.table.merge()}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Merge cells"
+                tooltip={t('table.mergeCells')}
               >
                 <CombineIcon />
               </ToolbarButton>
@@ -197,7 +199,7 @@ function TableFloatingToolbar({
               <ToolbarButton
                 onClick={() => tf.table.split()}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Split cell"
+                tooltip={t('table.splitCell')}
               >
                 <SquareSplitHorizontalIcon />
               </ToolbarButton>
@@ -205,7 +207,7 @@ function TableFloatingToolbar({
 
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <ToolbarButton tooltip="Cell borders">
+                <ToolbarButton tooltip={t('table.cellBorders')}>
                   <Grid2X2Icon />
                 </ToolbarButton>
               </DropdownMenuTrigger>
@@ -217,7 +219,7 @@ function TableFloatingToolbar({
 
             {collapsedInside && (
               <ToolbarGroup>
-                <ToolbarButton tooltip="Delete table" {...buttonProps}>
+                <ToolbarButton tooltip={t('table.deleteTable')} {...buttonProps}>
                   <Trash2Icon />
                 </ToolbarButton>
               </ToolbarGroup>
@@ -231,7 +233,7 @@ function TableFloatingToolbar({
                   tf.insert.tableRow({ before: true });
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Insert row before"
+                tooltip={t('table.insertRowBefore')}
               >
                 <ArrowUp />
               </ToolbarButton>
@@ -240,7 +242,7 @@ function TableFloatingToolbar({
                   tf.insert.tableRow();
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Insert row after"
+                tooltip={t('table.insertRowAfter')}
               >
                 <ArrowDown />
               </ToolbarButton>
@@ -249,7 +251,7 @@ function TableFloatingToolbar({
                   tf.remove.tableRow();
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Delete row"
+                tooltip={t('table.deleteRow')}
               >
                 <XIcon />
               </ToolbarButton>
@@ -263,7 +265,7 @@ function TableFloatingToolbar({
                   tf.insert.tableColumn({ before: true });
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Insert column before"
+                tooltip={t('table.insertColBefore')}
               >
                 <ArrowLeft />
               </ToolbarButton>
@@ -272,7 +274,7 @@ function TableFloatingToolbar({
                   tf.insert.tableColumn();
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Insert column after"
+                tooltip={t('table.insertColAfter')}
               >
                 <ArrowRight />
               </ToolbarButton>
@@ -281,7 +283,7 @@ function TableFloatingToolbar({
                   tf.remove.tableColumn();
                 }}
                 onMouseDown={(e) => e.preventDefault()}
-                tooltip="Delete column"
+                tooltip={t('table.deleteCol')}
               >
                 <XIcon />
               </ToolbarButton>
@@ -378,6 +380,7 @@ function ColorDropdownMenu({
   tooltip: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations('editor');
 
   const editor = useEditorRef();
   const selectedCells = usePluginOption(TablePlugin, 'selectedCells');
@@ -405,7 +408,7 @@ function ColorDropdownMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start">
-        <ToolbarMenuGroup label="Colors">
+        <ToolbarMenuGroup label={t('table.colors')}>
           <ColorDropdownMenuItems
             className="px-2"
             colors={DEFAULT_COLORS}
@@ -415,7 +418,7 @@ function ColorDropdownMenu({
         <DropdownMenuGroup>
           <DropdownMenuItem className="p-2" onClick={onClearColor}>
             <EraserIcon />
-            <span>Clear</span>
+            <span>{t('fontColors.clear')}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

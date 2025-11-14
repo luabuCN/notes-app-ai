@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   useToggleToolbarButton,
@@ -15,9 +16,10 @@ export function ToggleToolbarButton(
 ) {
   const state = useToggleToolbarButtonState();
   const { props: buttonProps } = useToggleToolbarButton(state);
+  const t = useTranslations('editor');
 
   return (
-    <ToolbarButton {...props} {...buttonProps} tooltip="Toggle">
+    <ToolbarButton {...props} {...buttonProps} tooltip={t('toolbar.toggle')}>
       <ListCollapseIcon />
     </ToolbarButton>
   );

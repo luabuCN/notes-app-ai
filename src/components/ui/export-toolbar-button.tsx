@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -147,10 +148,11 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
     await downloadFile(url, 'plate.md');
   };
 
+  const t = useTranslations('editor');
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Export" isDropdown>
+        <ToolbarButton pressed={open} tooltip={t('toolbar.export')} isDropdown>
           <ArrowDownToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>
@@ -158,16 +160,16 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
       <DropdownMenuContent align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={exportToHtml}>
-            Export as HTML
+            {t('exportMenu.asHtml')}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={exportToPdf}>
-            Export as PDF
+            {t('exportMenu.asPdf')}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={exportToImage}>
-            Export as Image
+            {t('exportMenu.asImage')}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={exportToMarkdown}>
-            Export as Markdown
+            {t('exportMenu.asMarkdown')}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

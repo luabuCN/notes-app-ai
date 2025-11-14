@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { TAudioElement } from 'platejs';
 import type { PlateElementProps } from 'platejs/react';
@@ -15,6 +16,7 @@ export const AudioElement = withHOC(
   ResizableProvider,
   function AudioElement(props: PlateElementProps<TAudioElement>) {
     const { align = 'center', readOnly, unsafeUrl } = useMediaState();
+    const t = useTranslations('editor');
 
     return (
       <PlateElement {...props} className="mb-1">
@@ -30,7 +32,7 @@ export const AudioElement = withHOC(
             <CaptionTextarea
               className="h-20"
               readOnly={readOnly}
-              placeholder="Write a caption..."
+              placeholder={t('placeholders.caption')}
             />
           </Caption>
         </figure>

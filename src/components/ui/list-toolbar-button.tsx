@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { ListStyleType, someList, toggleList } from '@platejs/list';
 import {
@@ -197,9 +198,10 @@ export function TodoListToolbarButton(
 ) {
   const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
+  const t = useTranslations('editor');
 
   return (
-    <ToolbarButton {...props} {...buttonProps} tooltip="Todo">
+    <ToolbarButton {...props} {...buttonProps} tooltip={t('toolbar.todo')}>
       <ListTodoIcon />
     </ToolbarButton>
   );

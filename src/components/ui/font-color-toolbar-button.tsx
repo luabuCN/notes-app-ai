@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type {
   DropdownMenuItemProps,
@@ -145,9 +146,10 @@ function PureColorPicker({
   updateCustomColor: (color: string) => void;
   color?: string;
 }) {
+  const t = useTranslations('editor');
   return (
     <div className={cn('flex flex-col', className)} {...props}>
-      <ToolbarMenuGroup label="Custom Colors">
+      <ToolbarMenuGroup label={t('fontColors.custom')}>
         <ColorCustom
           color={color}
           className="px-2"
@@ -157,7 +159,7 @@ function PureColorPicker({
           updateCustomColor={updateCustomColor}
         />
       </ToolbarMenuGroup>
-      <ToolbarMenuGroup label="Default Colors">
+      <ToolbarMenuGroup label={t('fontColors.default')}>
         <ColorDropdownMenuItems
           color={color}
           className="px-2"
@@ -169,7 +171,7 @@ function PureColorPicker({
         <ToolbarMenuGroup>
           <DropdownMenuItem className="p-2" onClick={clearColor}>
             <EraserIcon />
-            <span>Clear</span>
+            <span>{t('fontColors.clear', { default: 'Clear' })}</span>
           </DropdownMenuItem>
         </ToolbarMenuGroup>
       )}

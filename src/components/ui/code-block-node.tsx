@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { formatCodeBlock, isLangSupported } from '@platejs/code-block';
 import { BracesIcon, Check, CheckIcon, CopyIcon } from 'lucide-react';
@@ -31,6 +32,7 @@ import { cn } from '@/lib/utils';
 
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
   const { editor, element } = props;
+  const t = useTranslations('editor');
 
   return (
     <PlateElement
@@ -52,7 +54,7 @@ export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
               variant="ghost"
               className="size-6 text-xs"
               onClick={() => formatCodeBlock(editor, { element })}
-              title="Format code"
+              title={t('placeholders.formatCode')}
             >
               <BracesIcon className="!size-3.5 text-muted-foreground" />
             </Button>
@@ -79,6 +81,7 @@ function CodeBlockCombobox() {
   const element = useElement<TCodeBlockElement>();
   const value = element.lang || 'plaintext';
   const [searchValue, setSearchValue] = React.useState('');
+  const t = useTranslations('editor');
 
   const items = React.useMemo(
     () =>
@@ -115,9 +118,9 @@ function CodeBlockCombobox() {
             className="h-9"
             value={searchValue}
             onValueChange={(value) => setSearchValue(value)}
-            placeholder="Search language..."
+            placeholder={t('placeholders.searchLanguage')}
           />
-          <CommandEmpty>No language found.</CommandEmpty>
+          <CommandEmpty>{t('placeholders.noLanguageFound')}</CommandEmpty>
 
           <CommandList className="h-[344px] overflow-y-auto">
             <CommandGroup>

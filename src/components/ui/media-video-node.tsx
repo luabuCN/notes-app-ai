@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import ReactPlayer from 'react-player';
 
@@ -38,6 +39,7 @@ export const VideoElement = withHOC(
       urlParsers: [parseTwitterUrl, parseVideoUrl],
     });
     const width = useResizableValue('width');
+    const t = useTranslations('editor');
 
     const isEditorMounted = useEditorMounted();
 
@@ -112,7 +114,7 @@ export const VideoElement = withHOC(
           <Caption style={{ width }} align={align}>
             <CaptionTextarea
               readOnly={readOnly}
-              placeholder="Write a caption..."
+              placeholder={t('placeholders.caption')}
             />
           </Caption>
         </figure>

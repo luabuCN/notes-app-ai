@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import { Redo2Icon, Undo2Icon } from 'lucide-react';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
@@ -15,6 +16,7 @@ export function RedoToolbarButton(
     (editor) => editor.history.redos.length === 0,
     []
   );
+  const t = useTranslations('editor');
 
   return (
     <ToolbarButton
@@ -22,7 +24,7 @@ export function RedoToolbarButton(
       disabled={disabled}
       onClick={() => editor.redo()}
       onMouseDown={(e) => e.preventDefault()}
-      tooltip="Redo"
+      tooltip={t('toolbar.redo')}
     >
       <Redo2Icon />
     </ToolbarButton>
@@ -37,6 +39,7 @@ export function UndoToolbarButton(
     (editor) => editor.history.undos.length === 0,
     []
   );
+  const t2 = useTranslations('editor');
 
   return (
     <ToolbarButton
@@ -44,7 +47,7 @@ export function UndoToolbarButton(
       disabled={disabled}
       onClick={() => editor.undo()}
       onMouseDown={(e) => e.preventDefault()}
-      tooltip="Undo"
+      tooltip={t2('toolbar.undo')}
     >
       <Undo2Icon />
     </ToolbarButton>

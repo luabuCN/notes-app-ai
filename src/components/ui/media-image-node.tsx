@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { TImageElement } from 'platejs';
 import type { PlateElementProps } from 'platejs/react';
@@ -25,6 +26,7 @@ export const ImageElement = withHOC(
   function ImageElement(props: PlateElementProps<TImageElement>) {
     const { align = 'center', focused, readOnly, selected } = useMediaState();
     const width = useResizableValue('width');
+    const t = useTranslations('editor');
 
     const { isDragging, handleRef } = useDraggable({
       element: props.element,
@@ -69,7 +71,7 @@ export const ImageElement = withHOC(
                 onFocus={(e) => {
                   e.preventDefault();
                 }}
-                placeholder="Write a caption..."
+                placeholder={t('placeholders.caption')}
               />
             </Caption>
           </figure>

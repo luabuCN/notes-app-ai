@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -82,6 +83,7 @@ export function MediaToolbarButton({
   ...props
 }: DropdownMenuProps & { nodeType: string }) {
   const currentConfig = MEDIA_CONFIG[nodeType];
+  const t = useTranslations('editor');
 
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -128,16 +130,16 @@ export function MediaToolbarButton({
             align="start"
             alignOffset={-32}
           >
-            <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => openFilePicker()}>
-                {currentConfig.icon}
-                Upload from computer
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-                <LinkIcon />
-                Insert via URL
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+              <DropdownMenuGroup>
+                <DropdownMenuItem onSelect={() => openFilePicker()}>
+                  {currentConfig.icon}
+                  {t('media.uploadFromComputer')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+                  <LinkIcon />
+                  {t('media.insertViaUrl')}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </ToolbarSplitButton>
@@ -169,11 +171,12 @@ function MediaUrlDialogContent({
   nodeType: string;
   setOpen: (value: boolean) => void;
 }) {
+  const t = useTranslations('editor');
   const editor = useEditorRef();
   const [url, setUrl] = React.useState('');
 
   const embedMedia = React.useCallback(() => {
-    if (!isUrl(url)) return toast.error('Invalid URL');
+    if (!isUrl(url)) return toast.error(t('media.invalidUrl'));
 
     setOpen(false);
     editor.tf.insertNodes({
@@ -187,7 +190,15 @@ function MediaUrlDialogContent({
   return (
     <>
       <AlertDialogHeader>
-        <AlertDialogTitle>{currentConfig.title}</AlertDialogTitle>
+        <AlertDialogTitle>
+          {nodeType === KEYS.audio
+            ? t('media.insertAudio')
+            : nodeType === KEYS.file
+            ? t('media.insertFile')
+            : nodeType === KEYS.img
+            ? t('media.insertImage')
+            : t('media.insertVideo')}
+        </AlertDialogTitle>
       </AlertDialogHeader>
 
       <AlertDialogDescription className="group relative w-full">
@@ -195,7 +206,7 @@ function MediaUrlDialogContent({
           className="absolute top-1/2 block -translate-y-1/2 cursor-text px-1 text-sm text-muted-foreground/70 transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:text-xs group-focus-within:font-medium group-focus-within:text-foreground has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:text-xs has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground"
           htmlFor="url"
         >
-          <span className="inline-flex bg-background px-2">URL</span>
+          <span className="inline-flex bg-background px-2">{t('media.url')}</span>
         </label>
         <Input
           id="url"
@@ -212,14 +223,14 @@ function MediaUrlDialogContent({
       </AlertDialogDescription>
 
       <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogCancel>{t('media.cancel')}</AlertDialogCancel>
         <AlertDialogAction
           onClick={(e) => {
             e.preventDefault();
             embedMedia();
           }}
         >
-          Accept
+          {t('media.accept')}
         </AlertDialogAction>
       </AlertDialogFooter>
     </>

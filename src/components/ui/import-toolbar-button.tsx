@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -70,7 +71,7 @@ export function ImportToolbarButton(props: DropdownMenuProps) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Import" isDropdown>
+        <ToolbarButton pressed={open} tooltip={useTranslations('editor')('toolbar.import')} isDropdown>
           <ArrowUpToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>
@@ -82,7 +83,7 @@ export function ImportToolbarButton(props: DropdownMenuProps) {
               openHtmlFilePicker();
             }}
           >
-            Import from HTML
+            {useTranslations('editor')('importMenu.fromHtml')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -90,7 +91,7 @@ export function ImportToolbarButton(props: DropdownMenuProps) {
               openMdFilePicker();
             }}
           >
-            Import from Markdown
+            {useTranslations('editor')('importMenu.fromMarkdown')}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
