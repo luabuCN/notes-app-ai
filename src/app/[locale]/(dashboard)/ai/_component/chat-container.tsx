@@ -18,6 +18,21 @@ import { useSession } from "@/lib/auth-client";
 import { FileAttachment } from "./types";
 import { useRouter } from "@/i18n/navigation";
 
+type PendingMessageState = {
+  chatId: string | null;
+  text: string;
+  attachments: FileAttachment[];
+  payload: {
+    text: string;
+    files?: FileList;
+  };
+  status: "pending" | "sending";
+};
+
+const pendingMessageStore: { current: PendingMessageState | null } = {
+  current: null,
+};
+
 export function ChatContainer() {
   const { messages: initMessage, isLoading } = useMessages();
   const { chatId } = useChatSession();
@@ -29,21 +44,24 @@ export function ChatContainer() {
   const user = data?.user;
 
   const hasProcessedFirstMessage = useRef(false);
-  const pendingMessageRef = useRef<{
-    text: string;
-    attachments: FileAttachment[];
-  } | null>(null);
-
-  // 新增：存储即将创建的聊天的临时 ID 和消息
-  const tempChatIdRef = useRef<string | null>(null);
-  const tempMessagesRef = useRef<any[]>([]);
+  const pendingMessageRef = useRef<PendingMessageState | null>(
+    pendingMessageStore.current
+  );
+  const syncPendingMessage = useCallback(
+    (value: PendingMessageState | null) => {
+      pendingMessageStore.current = value;
+      pendingMessageRef.current = value;
+    },
+    []
+  );
+  const activeChatId = chatId;
 
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const { messages, status, regenerate, setMessages, sendMessage } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/ai/chat",
-      body: chatId ? { chatId } : undefined,
+      body: activeChatId ? { chatId: activeChatId } : undefined,
     }),
     messages: initMessage,
 
@@ -51,37 +69,23 @@ export function ChatContainer() {
       const { message, messages } = data;
       console.log("finish", message, messages);
 
-      // 首次对话：创建会话
-      if (!chatId && pendingMessageRef.current) {
-        const pendingData = pendingMessageRef.current;
-        pendingMessageRef.current = null;
-
-        // 在创建之前，保存当前消息到临时存储
-        tempMessagesRef.current = messages;
-
-        createConversationMutation.mutate({
-          firstMessage: pendingData.text,
-        });
-        return;
-      }
-
-      // 已有会话：直接保存
-      if (chatId) {
+      if (activeChatId) {
         saveMessageMutation.mutate({
-          conversationId: chatId,
+          conversationId: activeChatId,
           messages,
         });
+      } else {
+        console.warn("未获取到会话 ID，无法保存消息");
       }
     },
 
     onError: (error: any) => {
       console.error("chat error", error);
       toast.error(error?.message || "发送消息失败");
-      if (!chatId && pendingMessageRef.current) {
-        const pendingData = pendingMessageRef.current;
-        setInput(pendingData.text);
-        setAttachments(pendingData.attachments);
-        pendingMessageRef.current = null;
+      if (pendingMessageRef.current) {
+        setInput(pendingMessageRef.current.text);
+        setAttachments(pendingMessageRef.current.attachments);
+        syncPendingMessage(null);
       }
     },
   });
@@ -95,11 +99,20 @@ export function ChatContainer() {
       conversationId: string;
       messages: any[];
     }) => saveMessages(conversationId, messages),
-    onSuccess: () => {
+    onSuccess: (
+      _,
+      { conversationId }: { conversationId: string; messages: any[] }
+    ) => {
       queryClient.invalidateQueries({
-        queryKey: ["chat-messages", chatId],
+        queryKey: ["chat-messages", conversationId],
         exact: true,
       });
+      if (
+        pendingMessageRef.current &&
+        pendingMessageRef.current.status === "sending"
+      ) {
+        syncPendingMessage(null);
+      }
     },
     onError: (error: any) => {
       console.error("保存对话失败", error);
@@ -116,43 +129,6 @@ export function ChatContainer() {
         title: firstMessage.substring(0, 10),
         userId: user!.id,
       }),
-    onSuccess: (data) => {
-      // 保存新创建的聊天 ID
-      tempChatIdRef.current = data.id;
-
-      // 立即更新本地消息缓存，避免路由切换后出现闪屏
-      queryClient.setQueryData(
-        ["chat-messages", data.id],
-        {
-          messages: tempMessagesRef.current,
-        }
-      );
-
-      // 保存当前消息
-      if (tempMessagesRef.current.length > 0) {
-        saveMessageMutation.mutate({
-          conversationId: data.id,
-          messages: tempMessagesRef.current,
-        });
-      }
-
-      // 路由跳转（此时缓存已经有数据，不会导致闪屏）
-      router.push(`/ai/c/${data.id}`);
-
-      // 路由跳转后清理临时数据
-      setTimeout(() => {
-        tempChatIdRef.current = null;
-        tempMessagesRef.current = [];
-      }, 100);
-
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
-    },
-    onError: (error) => {
-      console.error("创建会话失败:", error);
-      toast.error("创建对话失败");
-      tempMessagesRef.current = [];
-      tempChatIdRef.current = null;
-    },
   });
 
   // 初始化历史消息
@@ -183,6 +159,29 @@ export function ChatContainer() {
     hasProcessedFirstMessage.current = false;
   }, [chatId]);
 
+  // 当会话 ID 准备好后，发送首条待发送的消息
+  useEffect(() => {
+    if (
+      chatId &&
+      pendingMessageRef.current &&
+      pendingMessageRef.current.chatId === chatId &&
+      pendingMessageRef.current.status === "pending"
+    ) {
+      pendingMessageRef.current.status = "sending";
+      (async () => {
+        try {
+          await sendMessage(pendingMessageRef.current!.payload);
+        } catch (error) {
+          console.error("发送首条消息失败", error);
+          toast.error("发送首条消息失败");
+          setInput(pendingMessageRef.current!.text);
+          setAttachments(pendingMessageRef.current!.attachments);
+          syncPendingMessage(null);
+        }
+      })();
+    }
+  }, [chatId, sendMessage, syncPendingMessage]);
+
   // 删除消息 mutation
   const deleteMessageMutation = useMutation({
     mutationFn: (messageId: string) => deleteMessage(messageId),
@@ -198,9 +197,9 @@ export function ChatContainer() {
       // 更新本地状态
       setMessages(messages.filter((message) => message.id !== messageId));
       // 更新查询缓存
-      if (chatId) {
+      if (activeChatId) {
         queryClient.invalidateQueries({
-          queryKey: ["chat-messages", chatId],
+          queryKey: ["chat-messages", activeChatId],
           exact: true,
         });
       }
@@ -219,13 +218,13 @@ export function ChatContainer() {
   // 删除消息
   const handleDelete = useCallback(
     (id: string) => {
-      if (!chatId) {
+      if (!activeChatId) {
         setMessages(messages.filter((message) => message.id !== id));
         return;
       }
       deleteMessageMutation.mutate(id);
     },
-    [messages, setMessages, chatId, deleteMessageMutation]
+    [messages, setMessages, activeChatId, deleteMessageMutation]
   );
 
   // 编辑消息
@@ -277,12 +276,32 @@ export function ChatContainer() {
       ...(fileList && { files: fileList }),
     };
 
-    // 首次对话
-    if (!chatId) {
-      pendingMessageRef.current = {
+    if (!activeChatId) {
+      syncPendingMessage({
+        chatId: null,
         text: messageContent,
         attachments: currentAttachments,
-      };
+        payload: messageData,
+        status: "pending",
+      });
+      try {
+        const data = await createConversationMutation.mutateAsync({
+          firstMessage: messageContent,
+        });
+        if (pendingMessageRef.current) {
+          syncPendingMessage({
+            ...pendingMessageRef.current,
+            chatId: data.id,
+          });
+        }
+        router.push(`/ai/c/${data.id}`);
+        queryClient.invalidateQueries({ queryKey: ["chats"] });
+      } catch (error: any) {
+        console.error("创建会话失败", error);
+        toast.error(error?.message || "创建对话失败");
+        syncPendingMessage(null);
+        return;
+      }
     }
 
     // 清空输入
@@ -292,8 +311,19 @@ export function ChatContainer() {
     });
     setAttachments([]);
 
-    await sendMessage(messageData);
-  }, [input, attachments, chatId, sendMessage]);
+    if (activeChatId) {
+      await sendMessage(messageData);
+    }
+  }, [
+    input,
+    attachments,
+    activeChatId,
+    sendMessage,
+    createConversationMutation,
+    queryClient,
+    router,
+    syncPendingMessage,
+  ]);
 
   const conversationProps = useMemo(
     () => ({
