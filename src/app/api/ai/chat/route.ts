@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     messages:convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {} as ToolSet,
-    experimental_transform: createSmoothStream(1, 5),
+    experimental_transform: createSmoothStream(10, 10),
   });
   return result.toUIMessageStreamResponse();
 }
