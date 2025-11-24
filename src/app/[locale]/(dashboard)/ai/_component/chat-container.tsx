@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { useMessages } from "@/lib/provider/message-provider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useChatSession } from "@/lib/provider/chat-session-provider";
-import { useSearchParams } from "next/navigation";
 import { saveMessages } from "../_action/use-save-message";
 import { createChat } from "../_action/use-create-chat";
 import { deleteMessage } from "../_action/use-delete-message";
@@ -21,14 +20,11 @@ import { useRouter } from "@/i18n/navigation";
 export function ChatContainer() {
   const { messages: initMessage, isLoading } = useMessages();
   const { chatId } = useChatSession();
-  const searchParams = useSearchParams();
-  const firstMessage = searchParams?.get("firstMessage");
   const queryClient = useQueryClient();
   const router = useRouter();
   const { data } = useSession();
   const user = data?.user;
 
-  const hasProcessedFirstMessage = useRef(false);
   const pendingMessageRef = useRef<{
     text: string;
     attachments: FileAttachment[];
@@ -37,6 +33,37 @@ export function ChatContainer() {
   // 新增：存储即将创建的聊天的临时 ID 和消息
   const tempChatIdRef = useRef<string | null>(null);
   const tempMessagesRef = useRef<any[]>([]);
+
+  const resetTempState = useCallback(() => {
+    tempChatIdRef.current = null;
+    tempMessagesRef.current = [];
+  }, []);
+
+  const invalidateMessagesCache = useCallback(
+    (id?: string | null) => {
+      if (!id) return;
+      queryClient.invalidateQueries({
+        queryKey: ["chat-messages", id],
+        exact: true,
+      });
+    },
+    [queryClient]
+  );
+
+  const buildFileList = useCallback((items: FileAttachment[]) => {
+    if (items.length === 0) return undefined;
+    const dataTransfer = new DataTransfer();
+    items.forEach((att) => {
+      dataTransfer.items.add(att.file);
+    });
+    return dataTransfer.files;
+  }, []);
+
+  const dismissToast = (toastId?: string | number) => {
+    if (toastId) {
+      toast.dismiss(toastId);
+    }
+  };
 
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
@@ -95,11 +122,8 @@ export function ChatContainer() {
       conversationId: string;
       messages: any[];
     }) => saveMessages(conversationId, messages),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["chat-messages", chatId],
-        exact: true,
-      });
+    onSuccess: (_, variables) => {
+      invalidateMessagesCache(variables.conversationId);
     },
     onError: (error: any) => {
       console.error("保存对话失败", error);
@@ -140,18 +164,14 @@ export function ChatContainer() {
       router.push(`/ai/c/${data.id}`);
 
       // 路由跳转后清理临时数据
-      setTimeout(() => {
-        tempChatIdRef.current = null;
-        tempMessagesRef.current = [];
-      }, 100);
+      setTimeout(resetTempState, 100);
 
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
     onError: (error) => {
       console.error("创建会话失败:", error);
       toast.error("创建对话失败");
-      tempMessagesRef.current = [];
-      tempChatIdRef.current = null;
+      resetTempState();
     },
   });
 
@@ -162,27 +182,6 @@ export function ChatContainer() {
     }
   }, [initMessage, messages.length, setMessages]);
 
-  // 处理 URL 中的 firstMessage
-  useEffect(() => {
-    if (
-      !isLoading &&
-      firstMessage &&
-      chatId &&
-      !hasProcessedFirstMessage.current
-    ) {
-      hasProcessedFirstMessage.current = true;
-      sendMessage({ text: firstMessage });
-      const url = new URL(window.location.href);
-      url.searchParams.delete("firstMessage");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [isLoading, firstMessage, chatId, sendMessage]);
-
-  // chatId 变化时重置
-  useEffect(() => {
-    hasProcessedFirstMessage.current = false;
-  }, [chatId]);
-
   // 删除消息 mutation
   const deleteMessageMutation = useMutation({
     mutationFn: (messageId: string) => deleteMessage(messageId),
@@ -192,25 +191,16 @@ export function ChatContainer() {
     },
     onSuccess: (_, messageId, context) => {
       // 关闭loading提示
-      if (context?.toastId) {
-        toast.dismiss(context.toastId);
-      }
+      dismissToast(context?.toastId);
       // 更新本地状态
       setMessages(messages.filter((message) => message.id !== messageId));
       // 更新查询缓存
-      if (chatId) {
-        queryClient.invalidateQueries({
-          queryKey: ["chat-messages", chatId],
-          exact: true,
-        });
-      }
+      invalidateMessagesCache(chatId);
       toast.success("消息已删除");
     },
     onError: (error: any, _, context) => {
       // 关闭loading提示
-      if (context?.toastId) {
-        toast.dismiss(context.toastId);
-      }
+      dismissToast(context?.toastId);
       console.error("删除消息失败", error);
       toast.error(error?.message || "删除消息失败");
     },
@@ -259,15 +249,7 @@ export function ChatContainer() {
     const messageContent = input.trim();
     const currentAttachments = [...attachments];
 
-    const fileList = currentAttachments.length > 0
-      ? (() => {
-          const dataTransfer = new DataTransfer();
-          currentAttachments.forEach((att) => {
-            dataTransfer.items.add(att.file);
-          });
-          return dataTransfer.files;
-        })()
-      : undefined;
+    const fileList = buildFileList(currentAttachments);
 
     const messageData: {
       text: string;
@@ -293,7 +275,7 @@ export function ChatContainer() {
     setAttachments([]);
 
     await sendMessage(messageData);
-  }, [input, attachments, chatId, sendMessage]);
+  }, [input, attachments, chatId, sendMessage, buildFileList]);
 
   const conversationProps = useMemo(
     () => ({
